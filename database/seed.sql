@@ -22,7 +22,6 @@ VALUES
     ('José Saramago', 'Portuguesa', 1922, 2010)
 ON CONFLICT DO NOTHING;
 
-
 -- ============================================================
 -- LIVROS
 -- ============================================================
@@ -31,6 +30,7 @@ INSERT INTO livros (
     titulo,
     isbn,
     ano_publicacao,
+    numero_chamada,
     autor_id
 )
 VALUES
@@ -38,46 +38,52 @@ VALUES
         'Dom Casmurro',
         '9788535902778',
         1899,
+        '869.3',
         (SELECT id FROM autores WHERE nome = 'Machado de Assis')
     ),
     (
         'Memórias Póstumas de Brás Cubas',
         '9788535910667',
         1881,
+        '869.3',
         (SELECT id FROM autores WHERE nome = 'Machado de Assis')
     ),
     (
         'A Hora da Estrela',
         '9788532508126',
         1977,
+        '869.3',
         (SELECT id FROM autores WHERE nome = 'Clarice Lispector')
     ),
     (
         '1984',
         '9780451524935',
         1949,
+        '823.912',
         (SELECT id FROM autores WHERE nome = 'George Orwell')
     ),
     (
         'A Revolução dos Bichos',
         '9780451526342',
         1945,
+        '823.912',
         (SELECT id FROM autores WHERE nome = 'George Orwell')
     ),
     (
         'Capitães da Areia',
         '9788535911695',
         1937,
+        '869.3',
         (SELECT id FROM autores WHERE nome = 'Jorge Amado')
     ),
     (
         'Ensaio sobre a Cegueira',
         '9788535904017',
         1995,
+        '869.3',
         (SELECT id FROM autores WHERE nome = 'José Saramago')
     )
 ON CONFLICT DO NOTHING;
-
 
 -- ============================================================
 -- EXEMPLARES

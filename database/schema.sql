@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS livros (
     titulo VARCHAR(200) NOT NULL,
     isbn VARCHAR(20) UNIQUE,
     ano_publicacao INTEGER,
+    numero_chamada VARCHAR(30),
     autor_id INTEGER NOT NULL,
 
     CONSTRAINT fk_livro_autor
