@@ -5,13 +5,7 @@ import fs from "node:fs/promises";
 
 dotenv.config();
 
-const {
-  DB_HOST,
-  DB_PORT,
-  DB_NAME,
-  DB_USER,
-  DB_PASSWORD
-} = process.env;
+const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD } = process.env;
 
 if (!DB_HOST || !DB_PORT || !DB_NAME || !DB_USER || !DB_PASSWORD) {
   throw new Error("Variáveis de ambiente do banco não configuradas.");
@@ -22,7 +16,7 @@ export const pool = new Pool({
   port: Number(DB_PORT),
   database: DB_NAME,
   user: DB_USER,
-  password: DB_PASSWORD
+  password: DB_PASSWORD,
 });
 
 export async function testaConexao(): Promise<void> {
@@ -31,20 +25,15 @@ export async function testaConexao(): Promise<void> {
 
     console.log("Conectado ao PostgreSQL!");
     console.log("Data/hora do servidor:", result.rows[0]);
-
   } catch (error) {
     console.error("Erro ao conectar ao PostgreSQL:", error);
   } finally {
   }
 }
 
-export async function aplicaSQL(fileName:string) {
-    try {
-      const schemaPath = path.join(
-      process.cwd(),
-      "database",
-      fileName
-    );
+export async function aplicaSQL(fileName: string) {
+  try {
+    const schemaPath = path.join(process.cwd(), "database", fileName);
 
     const sql = await fs.readFile(schemaPath, "utf-8");
     console.log(`schemaPath: ${schemaPath}`);
@@ -55,5 +44,4 @@ export async function aplicaSQL(fileName:string) {
     process.exitCode = 1;
   } finally {
   }
-  
 }

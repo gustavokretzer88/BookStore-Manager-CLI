@@ -54,9 +54,7 @@ export class LivroService {
       throw new Error("Deve ser informado o nome do autor.");
     }
 
-    const livros = await this.livroRepository.buscarPorNomeAutor(
-      nomeAutor.trim(),
-    );
+    const livros = await this.livroRepository.buscarPorNomeAutor(nomeAutor);
 
     if (livros.length === 0) {
       throw new Error(

@@ -1,10 +1,9 @@
-import { pool } from '../database/connection';
-import { Livro } from '../models/Livro';
+import { pool } from "../database/connection";
+import { Livro } from "../models/Livro";
 
 export class LivroRepository {
-
-    async buscarTodos(): Promise<Livro[]> {
-        const result = await pool.query<Livro>(`
+  async buscarTodos(): Promise<Livro[]> {
+    const result = await pool.query<Livro>(`
             SELECT
                 id,
                 titulo,
@@ -16,12 +15,12 @@ export class LivroRepository {
             ORDER BY titulo
         `);
 
-        return result.rows;
-    }
+    return result.rows;
+  }
 
-    async buscarPorId(id: number): Promise<Livro | null> {
-        const result = await pool.query<Livro>(
-            `
+  async buscarPorId(id: number): Promise<Livro | null> {
+    const result = await pool.query<Livro>(
+      `
             SELECT
                 id,
                 titulo,
@@ -32,15 +31,34 @@ export class LivroRepository {
             FROM livros
             WHERE id = $1
             `,
-            [id]
-        );
+      [id],
+    );
 
-        return result.rows[0] ?? null;
-    }
+    return result.rows[0] ?? null;
+  }
 
-    async buscarPorTitulo(titulo: string): Promise<Livro[]> {
-        const result = await pool.query<Livro>(
-            `
+  async buscarPorIsbn(isbn: string): Promise<Livro | null> {
+    const result = await pool.query<Livro>(
+      `
+            SELECT
+                id,
+                titulo,
+                isbn,
+                ano_publicacao,
+                numero_chamada,
+                autor_id
+            FROM livros
+            WHERE isbn = $1
+            `,
+      [isbn],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async buscarPorTitulo(titulo: string): Promise<Livro[]> {
+    const result = await pool.query<Livro>(
+      `
             SELECT
                 id,
                 titulo,
@@ -52,15 +70,15 @@ export class LivroRepository {
             WHERE titulo ILIKE '%' || $1 || '%'
             ORDER BY titulo
             `,
-            [titulo]
-        );
+      [titulo],
+    );
 
-        return result.rows;
-    }
+    return result.rows;
+  }
 
-    async buscarPorAutor(autorId: number): Promise<Livro[]> {
-        const result = await pool.query<Livro>(
-            `
+  async buscarPorAutor(autorId: number): Promise<Livro[]> {
+    const result = await pool.query<Livro>(
+      `
             SELECT
                 id,
                 titulo,
@@ -72,17 +90,37 @@ export class LivroRepository {
             WHERE autor_id = $1
             ORDER BY titulo
             `,
-            [autorId]
-        );
+      [autorId],
+    );
 
-        return result.rows;
-    }
+    return result.rows;
+  }
 
-    async buscarPorNumeroChamada(
-        numeroChamada: string
-    ): Promise<Livro[]> {
-        const result = await pool.query<Livro>(
-            `
+  async buscarPorNomeAutor(nomeAutor: string): Promise<Livro[]> {
+    const result = await pool.query<Livro>(
+      `
+            SELECT
+                l.id,
+                l.titulo,
+                l.isbn,
+                l.ano_publicacao,
+                l.numero_chamada,
+                l.autor_id
+            FROM livros l
+            INNER JOIN autores a
+                ON a.id = l.autor_id
+            WHERE a.nome ILIKE '%' || $1 || '%'
+            ORDER BY l.titulo
+            `,
+      [nomeAutor],
+    );
+
+    return result.rows;
+  }
+
+  async buscarPorNumeroChamada(numeroChamada: string): Promise<Livro[]> {
+    const result = await pool.query<Livro>(
+      `
             SELECT
                 id,
                 titulo,
@@ -94,21 +132,21 @@ export class LivroRepository {
             WHERE numero_chamada = $1
             ORDER BY titulo
             `,
-            [numeroChamada]
-        );
+      [numeroChamada],
+    );
 
-        return result.rows;
-    }
+    return result.rows;
+  }
 
-    async criar(
-        titulo: string,
-        isbn: string | null,
-        anoPublicacao: number | null,
-        numeroChamada: string | null,
-        autorId: number
-    ): Promise<Livro> {
-        const result = await pool.query<Livro>(
-            `
+  async criar(
+    titulo: string,
+    isbn: string | null,
+    anoPublicacao: number | null,
+    numeroChamada: string | null,
+    autorId: number,
+  ): Promise<Livro> {
+    const result = await pool.query<Livro>(
+      `
             INSERT INTO livros (
                 titulo,
                 isbn,
@@ -125,31 +163,25 @@ export class LivroRepository {
                 numero_chamada,
                 autor_id
             `,
-            [
-                titulo,
-                isbn,
-                anoPublicacao,
-                numeroChamada,
-                autorId
-            ]
-        );
-        const livro = result.rows[0];
-        if(!livro) {
-            throw new Error("Não foi possível criar o livro.");
-        }
-        return livro;
+      [titulo, isbn, anoPublicacao, numeroChamada, autorId],
+    );
+    const livro = result.rows[0];
+    if (!livro) {
+      throw new Error("Não foi possível criar o livro.");
     }
+    return livro;
+  }
 
-    async atualizar(
-        id: number,
-        titulo: string,
-        isbn: string | null,
-        anoPublicacao: number | null,
-        numeroChamada: string | null,
-        autorId: number
-    ): Promise<Livro | null> {
-        const result = await pool.query<Livro>(
-            `
+  async atualizar(
+    id: number,
+    titulo: string,
+    isbn: string | null,
+    anoPublicacao: number | null,
+    numeroChamada: string | null,
+    autorId: number,
+  ): Promise<Livro | null> {
+    const result = await pool.query<Livro>(
+      `
             UPDATE livros
             SET
                 titulo = $1,
@@ -166,28 +198,21 @@ export class LivroRepository {
                 numero_chamada,
                 autor_id
             `,
-            [
-                titulo,
-                isbn,
-                anoPublicacao,
-                numeroChamada,
-                autorId,
-                id
-            ]
-        );
+      [titulo, isbn, anoPublicacao, numeroChamada, autorId, id],
+    );
 
-        return result.rows[0] ?? null;
-    }
+    return result.rows[0] ?? null;
+  }
 
-    async excluir(id: number): Promise<boolean> {
-        const result = await pool.query(
-            `
+  async excluir(id: number): Promise<boolean> {
+    const result = await pool.query(
+      `
             DELETE FROM livros
             WHERE id = $1
             `,
-            [id]
-        );
+      [id],
+    );
 
-        return result.rowCount !== null && result.rowCount > 0;
-    }
+    return result.rowCount !== null && result.rowCount > 0;
+  }
 }
