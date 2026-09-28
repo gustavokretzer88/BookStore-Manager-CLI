@@ -1,9 +1,10 @@
-import { pool } from "../database/connection";
-import { Exemplar } from "../models/Exemplar";
+import { pool } from '../database/connection';
+import { Exemplar } from '../models/Exemplar';
 
 export class ExemplarRepository {
-  async buscarTodos(): Promise<Exemplar[]> {
-    const result = await pool.query<Exemplar>(`
+
+    async buscarTodos(): Promise<Exemplar[]> {
+        const result = await pool.query<Exemplar>(`
             SELECT
                 id,
                 codigo,
@@ -13,12 +14,12 @@ export class ExemplarRepository {
             ORDER BY codigo
         `);
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async buscarPorId(id: number): Promise<Exemplar | null> {
-    const result = await pool.query<Exemplar>(
-      `
+    async buscarPorId(id: number): Promise<Exemplar | null> {
+        const result = await pool.query<Exemplar>(
+            `
             SELECT
                 id,
                 codigo,
@@ -27,15 +28,15 @@ export class ExemplarRepository {
             FROM exemplares
             WHERE id = $1
             `,
-      [id],
-    );
+            [id]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async buscarPorCodigo(codigo: string): Promise<Exemplar | null> {
-    const result = await pool.query<Exemplar>(
-      `
+    async buscarPorCodigo(codigo: string): Promise<Exemplar | null> {
+        const result = await pool.query<Exemplar>(
+            `
             SELECT
                 id,
                 codigo,
@@ -44,15 +45,15 @@ export class ExemplarRepository {
             FROM exemplares
             WHERE codigo = $1
             `,
-      [codigo],
-    );
+            [codigo]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async buscarPorLivro(livroId: number): Promise<Exemplar[]> {
-    const result = await pool.query<Exemplar>(
-      `
+    async buscarPorLivro(livroId: number): Promise<Exemplar[]> {
+        const result = await pool.query<Exemplar>(
+            `
             SELECT
                 id,
                 codigo,
@@ -62,17 +63,17 @@ export class ExemplarRepository {
             WHERE livro_id = $1
             ORDER BY codigo
             `,
-      [livroId],
-    );
+            [livroId]
+        );
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async buscarPorEstado(
-    estado: Exemplar["estado_conservacao"],
-  ): Promise<Exemplar[]> {
-    const result = await pool.query<Exemplar>(
-      `
+    async buscarPorEstado(
+        estado: Exemplar['estado_conservacao']
+    ): Promise<Exemplar[]> {
+        const result = await pool.query<Exemplar>(
+            `
             SELECT
                 id,
                 codigo,
@@ -82,38 +83,19 @@ export class ExemplarRepository {
             WHERE estado_conservacao = $1
             ORDER BY codigo
             `,
-      [estado],
-    );
+            [estado]
+        );
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-async buscarDisponiveis(): Promise<Exemplar[]> {
-    const result = await pool.query<Exemplar>(`
-        SELECT
-            e.id,
-            e.codigo,
-            e.livro_id,
-            e.estado_conservacao
-        FROM exemplares e
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM emprestimos emp
-            WHERE emp.exemplar_id = e.id
-              AND emp.devolvido = FALSE
-        )
-        ORDER BY e.codigo
-    `);
-
-    return result.rows;
-}
-  async criar(
-    codigo: string,
-    livroId: number,
-    estadoConservacao: Exemplar["estado_conservacao"],
-  ): Promise<Exemplar> {
-    const result = await pool.query<Exemplar>(
-      `
+    async criar(
+        codigo: string,
+        livroId: number,
+        estadoConservacao: Exemplar['estado_conservacao']
+    ): Promise<Exemplar> {
+        const result = await pool.query<Exemplar>(
+            `
             INSERT INTO exemplares (
                 codigo,
                 livro_id,
@@ -126,26 +108,30 @@ async buscarDisponiveis(): Promise<Exemplar[]> {
                 livro_id,
                 estado_conservacao
             `,
-      [codigo, livroId, estadoConservacao],
-    );
+            [
+                codigo,
+                livroId,
+                estadoConservacao
+            ]
+        );
 
-    const exemplar = result.rows[0];
+        const exemplar = result.rows[0];
 
-    if (!exemplar) {
-      throw new Error("Não foi possível criar o exemplar.");
+        if (!exemplar) {
+            throw new Error('Não foi possível criar o exemplar.');
+        }
+
+        return exemplar;
     }
 
-    return exemplar;
-  }
-
-  async atualizar(
-    id: number,
-    codigo: string,
-    livroId: number,
-    estadoConservacao: Exemplar["estado_conservacao"],
-  ): Promise<Exemplar | null> {
-    const result = await pool.query<Exemplar>(
-      `
+    async atualizar(
+        id: number,
+        codigo: string,
+        livroId: number,
+        estadoConservacao: Exemplar['estado_conservacao']
+    ): Promise<Exemplar | null> {
+        const result = await pool.query<Exemplar>(
+            `
             UPDATE exemplares
             SET
                 codigo = $1,
@@ -158,21 +144,26 @@ async buscarDisponiveis(): Promise<Exemplar[]> {
                 livro_id,
                 estado_conservacao
             `,
-      [codigo, livroId, estadoConservacao, id],
-    );
+            [
+                codigo,
+                livroId,
+                estadoConservacao,
+                id
+            ]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async excluir(id: number): Promise<boolean> {
-    const result = await pool.query(
-      `
+    async excluir(id: number): Promise<boolean> {
+        const result = await pool.query(
+            `
             DELETE FROM exemplares
             WHERE id = $1
             `,
-      [id],
-    );
+            [id]
+        );
 
-    return result.rowCount !== null && result.rowCount > 0;
-  }
+        return result.rowCount !== null && result.rowCount > 0;
+    }
 }

@@ -1,140 +1,152 @@
-import { pool } from "../database/connection";
-import { Emprestimo } from "../models/Emprestimo";
+import { pool } from '../database/connection';
+import { Emprestimo } from '../models/Emprestimo';
 
 export class EmprestimoRepository {
-  async buscarTodos(): Promise<Emprestimo[]> {
-    const result = await pool.query<Emprestimo>(`
+
+    async buscarTodos(): Promise<Emprestimo[]> {
+        const result = await pool.query<Emprestimo>(`
             SELECT
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             FROM emprestimos
             ORDER BY data_emprestimo DESC
         `);
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async buscarPorId(id: number): Promise<Emprestimo | null> {
-    const result = await pool.query<Emprestimo>(
-      `
+    async buscarPorId(id: number): Promise<Emprestimo | null> {
+        const result = await pool.query<Emprestimo>(
+            `
             SELECT
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             FROM emprestimos
             WHERE id = $1
             `,
-      [id],
-    );
+            [id]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async buscarPorCliente(clienteId: number): Promise<Emprestimo[]> {
-    const result = await pool.query<Emprestimo>(
-      `
+    async buscarPorCliente(clienteId: number): Promise<Emprestimo[]> {
+        const result = await pool.query<Emprestimo>(
+            `
             SELECT
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             FROM emprestimos
             WHERE cliente_id = $1
             ORDER BY data_emprestimo DESC
             `,
-      [clienteId],
-    );
+            [clienteId]
+        );
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async buscarPorExemplar(exemplarId: number): Promise<Emprestimo[]> {
-    const result = await pool.query<Emprestimo>(
-      `
+    async buscarPorExemplar(exemplarId: number): Promise<Emprestimo[]> {
+        const result = await pool.query<Emprestimo>(
+            `
             SELECT
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             FROM emprestimos
             WHERE exemplar_id = $1
             ORDER BY data_emprestimo DESC
             `,
-      [exemplarId],
-    );
+            [exemplarId]
+        );
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async buscarAtivos(): Promise<Emprestimo[]> {
-    const result = await pool.query<Emprestimo>(`
+    async buscarAtivos(): Promise<Emprestimo[]> {
+        const result = await pool.query<Emprestimo>(`
             SELECT
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             FROM emprestimos
-            WHERE data_devolucao IS NULL
+            WHERE devolvido = FALSE
             ORDER BY data_emprestimo
         `);
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async buscarAtivoPorExemplar(exemplarId: number): Promise<Emprestimo | null> {
-    const result = await pool.query<Emprestimo>(
-      `
+    async buscarAtivoPorExemplar(
+        exemplarId: number
+    ): Promise<Emprestimo | null> {
+        const result = await pool.query<Emprestimo>(
+            `
             SELECT
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             FROM emprestimos
             WHERE exemplar_id = $1
-              AND data_devolucao IS NULL
+              AND devolvido = FALSE
             `,
-      [exemplarId],
-    );
+            [exemplarId]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async buscarAtivosPorCliente(clienteId: number): Promise<Emprestimo[]> {
-    const result = await pool.query<Emprestimo>(
-      `
+    async buscarAtivosPorCliente(
+        clienteId: number
+    ): Promise<Emprestimo[]> {
+        const result = await pool.query<Emprestimo>(
+            `
             SELECT
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             FROM emprestimos
             WHERE cliente_id = $1
-              AND data_devolucao IS NULL
+              AND devolvido = FALSE
             ORDER BY data_emprestimo
             `,
-      [clienteId],
-    );
+            [clienteId]
+        );
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async criar(
-    exemplarId: number,
-    clienteId: number,
-    dataEmprestimo: string,
-  ): Promise<Emprestimo> {
-    const result = await pool.query<Emprestimo>(
-      `
+    async criar(
+        exemplarId: number,
+        clienteId: number,
+        dataEmprestimo: string
+    ): Promise<Emprestimo> {
+        const result = await pool.query<Emprestimo>(
+            `
             INSERT INTO emprestimos (
                 exemplar_id,
                 cliente_id,
@@ -146,53 +158,63 @@ export class EmprestimoRepository {
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             `,
-      [exemplarId, clienteId, dataEmprestimo],
-    );
+            [
+                exemplarId,
+                clienteId,
+                dataEmprestimo
+            ]
+        );
 
-    const emprestimo = result.rows[0];
+        const emprestimo = result.rows[0];
 
-    if (!emprestimo) {
-      throw new Error("Não foi possível criar o empréstimo.");
+        if (!emprestimo) {
+            throw new Error('Não foi possível criar o empréstimo.');
+        }
+
+        return emprestimo;
     }
 
-    return emprestimo;
-  }
-
-  async devolver(
-    id: number,
-    dataDevolucao: string,
-  ): Promise<Emprestimo | null> {
-    const result = await pool.query<Emprestimo>(
-      `
+    async devolver(
+        id: number,
+        dataDevolucao: string
+    ): Promise<Emprestimo | null> {
+        const result = await pool.query<Emprestimo>(
+            `
             UPDATE emprestimos
             SET
-                data_devolucao = $1
+                data_devolucao = $1,
+                devolvido = TRUE
             WHERE id = $2
-              AND data_devolucao IS NULL
+              AND devolvido = FALSE
             RETURNING
                 id,
                 exemplar_id,
                 cliente_id,
                 data_emprestimo,
-                data_devolucao
+                data_devolucao,
+                devolvido
             `,
-      [dataDevolucao, id],
-    );
+            [
+                dataDevolucao,
+                id
+            ]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async excluir(id: number): Promise<boolean> {
-    const result = await pool.query(
-      `
+    async excluir(id: number): Promise<boolean> {
+        const result = await pool.query(
+            `
             DELETE FROM emprestimos
             WHERE id = $1
             `,
-      [id],
-    );
+            [id]
+        );
 
-    return result.rowCount !== null && result.rowCount > 0;
-  }
+        return result.rowCount !== null && result.rowCount > 0;
+    }
 }

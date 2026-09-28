@@ -1,9 +1,10 @@
-import { pool } from "../database/connection";
-import { Autor } from "../models/Autor";
+import { pool } from '../database/connection';
+import { Autor } from '../models/Autor';
 
 export class AutorRepository {
-  async buscarTodos(): Promise<Autor[]> {
-    const result = await pool.query<Autor>(`
+
+    async buscarTodos(): Promise<Autor[]> {
+        const result = await pool.query<Autor>(`
             SELECT
                 id,
                 nome,
@@ -14,12 +15,12 @@ export class AutorRepository {
             ORDER BY nome
         `);
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async buscarPorId(id: number): Promise<Autor | null> {
-    const result = await pool.query<Autor>(
-      `
+    async buscarPorId(id: number): Promise<Autor | null> {
+        const result = await pool.query<Autor>(
+            `
             SELECT
                 id,
                 nome,
@@ -29,15 +30,15 @@ export class AutorRepository {
             FROM autores
             WHERE id = $1
             `,
-      [id],
-    );
+            [id]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async buscarPorNome(nome: string): Promise<Autor[]> {
-    const result = await pool.query<Autor>(
-      `
+    async buscarPorNome(nome: string): Promise<Autor[]> {
+        const result = await pool.query<Autor>(
+            `
             SELECT
                 id,
                 nome,
@@ -48,20 +49,20 @@ export class AutorRepository {
             WHERE nome ILIKE '%' || $1 || '%'
             ORDER BY nome
             `,
-      [nome],
-    );
+            [nome]
+        );
 
-    return result.rows;
-  }
+        return result.rows;
+    }
 
-  async criar(
-    nome: string,
-    nacionalidade: string | null,
-    anoNascimento: number | null,
-    anoFalecimento: number | null,
-  ): Promise<Autor> {
-    const result = await pool.query<Autor>(
-      `
+    async criar(
+        nome: string,
+        nacionalidade: string | null,
+        anoNascimento: number | null,
+        anoFalecimento: number | null
+    ): Promise<Autor> {
+        const result = await pool.query<Autor>(
+            `
             INSERT INTO autores (
                 nome,
                 nacionalidade,
@@ -76,27 +77,32 @@ export class AutorRepository {
                 ano_nascimento,
                 ano_falecimento
             `,
-      [nome, nacionalidade, anoNascimento, anoFalecimento],
-    );
+            [
+                nome,
+                nacionalidade,
+                anoNascimento,
+                anoFalecimento
+            ]
+        );
 
-    const autor = result.rows[0];
+        const autor = result.rows[0];
 
-    if (!autor) {
-      throw new Error("Não foi possível criar o autor.");
+        if (!autor) {
+            throw new Error('Não foi possível criar o autor.');
+        }
+
+        return autor;
     }
 
-    return autor;
-  }
-
-  async atualizar(
-    id: number,
-    nome: string,
-    nacionalidade: string | null,
-    anoNascimento: number | null,
-    anoFalecimento: number | null,
-  ): Promise<Autor | null> {
-    const result = await pool.query<Autor>(
-      `
+    async atualizar(
+        id: number,
+        nome: string,
+        nacionalidade: string | null,
+        anoNascimento: number | null,
+        anoFalecimento: number | null
+    ): Promise<Autor | null> {
+        const result = await pool.query<Autor>(
+            `
             UPDATE autores
             SET
                 nome = $1,
@@ -111,21 +117,27 @@ export class AutorRepository {
                 ano_nascimento,
                 ano_falecimento
             `,
-      [nome, nacionalidade, anoNascimento, anoFalecimento, id],
-    );
+            [
+                nome,
+                nacionalidade,
+                anoNascimento,
+                anoFalecimento,
+                id
+            ]
+        );
 
-    return result.rows[0] ?? null;
-  }
+        return result.rows[0] ?? null;
+    }
 
-  async excluir(id: number): Promise<boolean> {
-    const result = await pool.query(
-      `
+    async excluir(id: number): Promise<boolean> {
+        const result = await pool.query(
+            `
             DELETE FROM autores
             WHERE id = $1
             `,
-      [id],
-    );
+            [id]
+        );
 
-    return result.rowCount !== null && result.rowCount > 0;
-  }
+        return result.rowCount !== null && result.rowCount > 0;
+    }
 }
