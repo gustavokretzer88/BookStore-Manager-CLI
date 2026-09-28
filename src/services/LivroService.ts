@@ -49,6 +49,13 @@ export class LivroService {
     return this.livroRepository.buscarPorIsbn(isbn);
   }
 
+  async buscarPorNumeroChamada(chamada: string): Promise<Livro[]> {
+    if (!chamada.trim()) {
+      throw new Error("A chamada do livro é obrigatório.");
+    }
+    return this.livroRepository.buscarPorNumeroChamada(chamada);
+  }
+
   async buscarPorNomeAutor(nomeAutor: string): Promise<Livro[]> {
     if (!nomeAutor.trim()) {
       throw new Error("Deve ser informado o nome do autor.");

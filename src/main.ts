@@ -1,13 +1,142 @@
-console.log("=================================");
-console.log("      BOOKSTORE MANAGER CLI");
-console.log("=================================");
+// import { select } from "@inquirer/prompts";
+// import { MenuPrincipal } from "./views/MenuPrincipal";
+// import { LivroView } from "./views/LivroView";
+// import { LivroController } from "./controllers/LivroController";
+// import { LivroService } from "./services/LivroService";
+// import { LivroRepository } from "./repositories/LivroRepository";
+// import { AutorRepository } from "./repositories/AutorRepository";
 
-console.log("Sistema iniciado.");
+// async function main(): Promise<void> {
+//   const livroRepository = new LivroRepository();
+//   const autorRepository = new AutorRepository();
 
-import { pool, testaConexao } from "./database/connection";
+//   const livroService = new LivroService(livroRepository, autorRepository);
+//   const livroController = new LivroController(livroService);
+//   const livroView = new LivroView(livroController);
+//       const menu = new MenuPrincipal(livroView);
+//       await menu.executar();
+//       console.log("Obrigado por usar nosso sistema de biblioteca, até breve!");
+//       process.exit(0);
+// }
+
+// main().catch((error) => {
+//   console.error(error);
+//   process.exit(1);
+// });
+
+import { MenuPrincipal } from "./views/MenuPrincipal";
+
+//import { AutorView } from './views/AutorView';
+import { LivroView } from "./views/LivroView";
+//import { ExemplarView } from './views/ExemplarView';
+//import { ClienteView } from './views/ClienteView';
+//import { EmprestimoView } from './views/EmprestimoView';
+
+import { AutorController } from "./controllers/AutorController";
+import { LivroController } from "./controllers/LivroController";
+import { ExemplarController } from "./controllers/ExemplarController";
+import { ClienteController } from "./controllers/ClienteController";
+import { EmprestimoController } from "./controllers/EmprestimoController";
+
+import { AutorService } from "./services/AutorService";
+import { LivroService } from "./services/LivroService";
+import { ExemplarService } from "./services/ExemplarService";
+import { ClienteService } from "./services/ClienteService";
+import { EmprestimoService } from "./services/EmprestimoService";
+
+import { AutorRepository } from "./repositories/AutorRepository";
+import { LivroRepository } from "./repositories/LivroRepository";
+import { ExemplarRepository } from "./repositories/ExemplarRepository";
+import { ClienteRepository } from "./repositories/ClienteRepository";
+import { EmprestimoRepository } from "./repositories/EmprestimoRepository";
 
 async function main(): Promise<void> {
-  await testaConexao();
+  // ========================================
+  // REPOSITORIES
+  // ========================================
+
+  const autorRepository = new AutorRepository();
+  const livroRepository = new LivroRepository();
+  const exemplarRepository = new ExemplarRepository();
+  const clienteRepository = new ClienteRepository();
+  const emprestimoRepository = new EmprestimoRepository();
+
+  // ========================================
+  // SERVICES
+  // ========================================
+
+  const autorService = new AutorService(autorRepository);
+
+  const livroService = new LivroService(livroRepository, autorRepository);
+
+  const exemplarService = new ExemplarService(
+    exemplarRepository,
+    livroRepository,
+  );
+
+  const clienteService = new ClienteService(clienteRepository);
+
+  const emprestimoService = new EmprestimoService(
+    emprestimoRepository,
+    clienteRepository,
+    exemplarRepository,
+  );
+
+  // ========================================
+  // CONTROLLERS
+  // ========================================
+
+  const autorController = new AutorController(autorService);
+
+  const livroController = new LivroController(livroService);
+
+  const exemplarController = new ExemplarController(exemplarService);
+
+  const clienteController = new ClienteController(clienteService);
+
+  const emprestimoController = new EmprestimoController(emprestimoService);
+
+  // ========================================
+  // VIEWS
+  // ========================================
+
+  // const autorView = new AutorView(
+  //     autorController
+  // );
+
+  const livroView = new LivroView(livroController, autorController);
+
+  // const exemplarView = new ExemplarView(
+  //     exemplarController
+  // );
+
+  // const clienteView = new ClienteView(
+  //     clienteController
+  // );
+
+  // const emprestimoView = new EmprestimoView(
+  //     emprestimoController
+  // );
+
+  // ========================================
+  // MENU PRINCIPAL
+  // ========================================
+
+  const menu = new MenuPrincipal(
+    //autorView,
+    livroView, //,
+    // exemplarView,
+    // clienteView,
+    // emprestimoView
+  );
+
+  await menu.executar();
+
+  console.log("Obrigado por usar nosso sistema de biblioteca, até breve!");
 }
 
-main();
+main().catch((error) => {
+  console.error("Erro inesperado:", error);
+
+  process.exit(1);
+});
