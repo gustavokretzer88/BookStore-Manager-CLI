@@ -8,7 +8,6 @@ import { pool, testaConexao } from "./database/connection";
 
 async function main(): Promise<void> {
   await testaConexao();
-  
 }
 
 main();

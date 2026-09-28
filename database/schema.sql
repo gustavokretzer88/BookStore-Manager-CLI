@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS livros (
     id SERIAL PRIMARY KEY,
     titulo VARCHAR(200) NOT NULL,
     isbn VARCHAR(20) UNIQUE,
-    ano_publicacao INTEGER,
-    numero_chamada VARCHAR(30),
+    ano_publicacao INTEGER NOT NULL,
+    numero_chamada VARCHAR(30) NOT NULL,
     autor_id INTEGER NOT NULL,
 
     CONSTRAINT fk_livro_autor
@@ -92,16 +92,12 @@ CREATE TABLE IF NOT EXISTS clientes (
 -- TABELA: emprestimos
 -- ============================================================
 
-CREATE TABLE IF NOT EXISTS emprestimos (
+CREATE TABLE emprestimos (
     id SERIAL PRIMARY KEY,
-
     exemplar_id INTEGER NOT NULL,
     cliente_id INTEGER NOT NULL,
-
     data_emprestimo DATE NOT NULL DEFAULT CURRENT_DATE,
     data_devolucao DATE,
-
-    devolvido BOOLEAN NOT NULL DEFAULT FALSE,
 
     CONSTRAINT fk_emprestimo_exemplar
         FOREIGN KEY (exemplar_id)
@@ -115,13 +111,6 @@ CREATE TABLE IF NOT EXISTS emprestimos (
         CHECK (
             data_devolucao IS NULL
             OR data_devolucao >= data_emprestimo
-        ),
-
-    CONSTRAINT chk_status_devolucao
-        CHECK (
-            (devolvido = FALSE AND data_devolucao IS NULL)
-            OR
-            (devolvido = TRUE AND data_devolucao IS NOT NULL)
         )
 );
 
@@ -147,6 +136,6 @@ CREATE INDEX IF NOT EXISTS idx_emprestimos_exemplar
 -- UM EXEMPLAR NÃO PODE TER DOIS EMPRÉSTIMOS ATIVOS
 -- ============================================================
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_exemplar_emprestimo_ativo
+CREATE UNIQUE INDEX idx_exemplar_emprestimo_ativo
     ON emprestimos(exemplar_id)
-    WHERE devolvido = FALSE;
+    WHERE data_devolucao IS NULL;
