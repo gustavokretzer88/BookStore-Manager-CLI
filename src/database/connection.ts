@@ -34,9 +34,7 @@ export async function testaConexao(): Promise<void> {
 
   } catch (error) {
     console.error("Erro ao conectar ao PostgreSQL:", error);
-
   } finally {
-    await pool.end();
   }
 }
 
@@ -49,13 +47,13 @@ export async function aplicaSQL(fileName:string) {
     );
 
     const sql = await fs.readFile(schemaPath, "utf-8");
+    console.log(`schemaPath: ${schemaPath}`);
 
     await pool.query(sql);
   } catch (error) {
     console.error("Erro ao aplicar SQL no banco de dados:", error);
     process.exitCode = 1;
   } finally {
-    await pool.end();
   }
   
 }

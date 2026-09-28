@@ -19,6 +19,3 @@ DROP TABLE IF EXISTS autores CASCADE;
 
 COMMIT;
 
-
--- Recria o schema
-\i schema.sql
