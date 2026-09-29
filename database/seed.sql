@@ -4,6 +4,8 @@
 -- ============================================================
 
 
+BEGIN;
+
 -- ============================================================
 -- AUTORES
 -- ============================================================
@@ -186,30 +188,26 @@ INSERT INTO emprestimos (
     exemplar_id,
     cliente_id,
     data_emprestimo,
-    data_devolucao,
-    devolvido
+    data_devolucao
 )
 VALUES
     (
         (SELECT id FROM exemplares WHERE codigo = 'EX-001'),
         (SELECT id FROM clientes WHERE email = 'joao@example.com'),
         CURRENT_DATE - 30,
-        CURRENT_DATE - 20,
-        TRUE
+        CURRENT_DATE - 20
     ),
     (
         (SELECT id FROM exemplares WHERE codigo = 'EX-004'),
         (SELECT id FROM clientes WHERE email = 'maria@example.com'),
         CURRENT_DATE - 25,
-        CURRENT_DATE - 15,
-        TRUE
+        CURRENT_DATE - 15
     ),
     (
         (SELECT id FROM exemplares WHERE codigo = 'EX-007'),
         (SELECT id FROM clientes WHERE email = 'pedro@example.com'),
         CURRENT_DATE - 40,
-        CURRENT_DATE - 25,
-        TRUE
+        CURRENT_DATE - 25
     );
 
 
@@ -218,25 +216,24 @@ VALUES
 INSERT INTO emprestimos (
     exemplar_id,
     cliente_id,
-    data_emprestimo,
-    devolvido
+    data_emprestimo
 )
 VALUES
     (
         (SELECT id FROM exemplares WHERE codigo = 'EX-002'),
         (SELECT id FROM clientes WHERE email = 'maria@example.com'),
-        CURRENT_DATE - 5,
-        FALSE
+        CURRENT_DATE - 5
     ),
     (
         (SELECT id FROM exemplares WHERE codigo = 'EX-005'),
         (SELECT id FROM clientes WHERE email = 'joao@example.com'),
-        CURRENT_DATE - 10,
-        FALSE
+        CURRENT_DATE - 10
     ),
     (
         (SELECT id FROM exemplares WHERE codigo = 'EX-010'),
         (SELECT id FROM clientes WHERE email = 'ana@example.com'),
-        CURRENT_DATE - 3,
-        FALSE
+        CURRENT_DATE - 3
     );
+
+
+COMMIT;

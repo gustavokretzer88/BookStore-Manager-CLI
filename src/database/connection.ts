@@ -36,7 +36,6 @@ export async function aplicaSQL(fileName: string) {
     const schemaPath = path.join(process.cwd(), "database", fileName);
 
     const sql = await fs.readFile(schemaPath, "utf-8");
-    console.log(`schemaPath: ${schemaPath}`);
 
     await pool.query(sql);
   } catch (error) {
