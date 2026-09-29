@@ -49,6 +49,10 @@ import { LivroRepository } from "./repositories/LivroRepository";
 import { ExemplarRepository } from "./repositories/ExemplarRepository";
 import { ClienteRepository } from "./repositories/ClienteRepository";
 import { EmprestimoRepository } from "./repositories/EmprestimoRepository";
+import { AutorView } from "./views/AutoresView";
+import { ClienteView } from "./views/ClienteView";
+import { ExemplarView } from "./views/ExemplarView";
+import { EmprestimoView } from "./views/EmprestimoView";
 
 async function main(): Promise<void> {
   // ========================================
@@ -100,34 +104,30 @@ async function main(): Promise<void> {
   // VIEWS
   // ========================================
 
-  // const autorView = new AutorView(
-  //     autorController
-  // );
+  const autorView: AutorView = new AutorView(autorController);
 
-  const livroView = new LivroView(livroController, autorController);
+  const livroView: LivroView = new LivroView(livroController, autorController);
 
-  // const exemplarView = new ExemplarView(
-  //     exemplarController
-  // );
+  const exemplarView = new ExemplarView(exemplarController, livroController);
 
-  // const clienteView = new ClienteView(
-  //     clienteController
-  // );
+  const clienteView = new ClienteView(clienteController);
 
-  // const emprestimoView = new EmprestimoView(
-  //     emprestimoController
-  // );
+  const emprestimoView = new EmprestimoView(
+    emprestimoController,
+    clienteController,
+    exemplarController,
+  );
 
   // ========================================
   // MENU PRINCIPAL
   // ========================================
 
   const menu = new MenuPrincipal(
-    //autorView,
-    livroView, //,
-    // exemplarView,
-    // clienteView,
-    // emprestimoView
+    livroView,
+    autorView,
+    clienteView,
+    exemplarView,
+    emprestimoView,
   );
 
   await menu.executar();

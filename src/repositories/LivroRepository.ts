@@ -205,14 +205,30 @@ export class LivroRepository {
   }
 
   async excluir(id: number): Promise<boolean> {
-    const result = await pool.query(
-      `
-            DELETE FROM livros
-            WHERE id = $1
-            `,
-      [id],
-    );
+    try {
+      const result = await pool.query(
+        `
+              DELETE FROM livros
+              WHERE id = $1
+              `,
+        [id],
+      );
 
-    return result.rowCount !== null && result.rowCount > 0;
+      return result.rowCount !== null && result.rowCount > 0;
+    } catch (erro) {
+      if (
+        erro instanceof Error &&
+        "code" in erro &&
+        erro.code === "23503" &&
+        "constraint" in erro &&
+        erro.constraint === "fk_exemplar_livro"
+      ) {
+        throw new Error(
+          "Não é possível remover o livro porque existem exemplares associados a ele.",
+        );
+      }
+
+      throw erro;
+    }
   }
 }

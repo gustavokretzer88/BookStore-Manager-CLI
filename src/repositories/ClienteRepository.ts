@@ -126,14 +126,30 @@ export class ClienteRepository {
   }
 
   async excluir(id: number): Promise<boolean> {
-    const result = await pool.query(
-      `
+    try {
+      const result = await pool.query(
+        `
             DELETE FROM clientes
             WHERE id = $1
             `,
-      [id],
-    );
+        [id],
+      );
 
-    return result.rowCount !== null && result.rowCount > 0;
+      return result.rowCount === 1;
+    } catch (erro) {
+      if (
+        erro instanceof Error &&
+        "code" in erro &&
+        erro.code === "23503" &&
+        "constraint" in erro &&
+        erro.constraint === "fk_emprestimo_cliente"
+      ) {
+        throw new Error(
+          "Não é possível remover o cliente porque existem empréstimos associados a ele.",
+        );
+      }
+
+      throw erro;
+    }
   }
 }
