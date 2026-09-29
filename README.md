@@ -1168,6 +1168,29 @@ A versão `develop` reúne as principais camadas necessárias para uma aplicaç�
 
 ---
 
+# 📦 Versão
+
+## v0.1 — Primeira versão
+
+A versão **v0.1** representa a primeira versão funcional do **BookStore Manager CLI**.
+
+Esta versão inclui:
+
+- gerenciamento de autores;
+- gerenciamento de livros;
+- gerenciamento de exemplares;
+- gerenciamento de clientes;
+- gerenciamento de empréstimos;
+- persistência em PostgreSQL;
+- arquitetura em camadas;
+- interface CLI interativa;
+- validações de regras de negócio;
+- scripts para criação, população, limpeza e reset do banco;
+- compilação TypeScript;
+- execução em ambiente de desenvolvimento e produção.
+
+**Data da versão:** 29/09/2026
+
 # 👤 Autor
 
 **Gustavo Pinho Kretzer de Souza**
