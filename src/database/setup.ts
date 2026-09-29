@@ -50,7 +50,7 @@ async function setupBD(): Promise<void> {
       console.log(`Banco de dados "${dbName}" já existe.`);
     }
 
-    aplicaSQL("schema.sql");
+    await aplicaSQL("schema.sql");
   } finally {
     await adminPool.end();
     await pool.end();
