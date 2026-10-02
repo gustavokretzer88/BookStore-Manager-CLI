@@ -1,4 +1,5 @@
 import { pool } from "../database/connection";
+import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
 import { Livro } from "../models/Livro";
 
 export class LivroRepository {
@@ -14,6 +15,24 @@ export class LivroRepository {
             FROM livros
             ORDER BY titulo
         `);
+
+    return result.rows;
+  }
+
+  async buscarTodosComAutor(): Promise<LivroComAutorDTO[]> {
+    const result = await pool.query(`
+        SELECT
+            l.id,
+            l.titulo,
+            l.isbn,
+            l.ano_publicacao,
+            l.numero_chamada,
+            a.nome AS autor_nome
+        FROM livros l
+        INNER JOIN autores a
+            ON a.id = l.autor_id
+        ORDER BY l.titulo
+    `);
 
     return result.rows;
   }
@@ -37,6 +56,27 @@ export class LivroRepository {
     return result.rows[0] ?? null;
   }
 
+  async buscarPorIdComAutor(id: number): Promise<LivroComAutorDTO | null> {
+    const result = await pool.query(
+      `
+            SELECT
+              l.id,
+              l.titulo,
+              l.isbn,
+              l.ano_publicacao,
+              l.numero_chamada,
+              a.nome AS autor_nome
+          FROM livros l
+          INNER JOIN autores a
+              ON a.id = l.autor_id
+          WHERE l.id = $1
+          `,
+      [id],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
   async buscarPorIsbn(isbn: string): Promise<Livro | null> {
     const result = await pool.query<Livro>(
       `
@@ -49,6 +89,27 @@ export class LivroRepository {
                 autor_id
             FROM livros
             WHERE isbn = $1
+            `,
+      [isbn],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async buscarPorIsbnComAutor(isbn: string): Promise<LivroComAutorDTO | null> {
+    const result = await pool.query(
+      `
+            SELECT
+                l.id,
+                l.titulo,
+                l.isbn,
+                l.ano_publicacao,
+                l.numero_chamada,
+                a.nome AS autor_nome
+            FROM livros l
+            INNER JOIN autores a
+                ON l.autor_id = a.id
+            WHERE l.isbn = $1
             `,
       [isbn],
     );
@@ -76,6 +137,28 @@ export class LivroRepository {
     return result.rows;
   }
 
+  async buscarPorTituloComAutor(titulo: string): Promise<LivroComAutorDTO[]> {
+    const result = await pool.query<LivroComAutorDTO>(
+      `
+        SELECT
+            l.id,
+            l.titulo,
+            l.isbn,
+            l.ano_publicacao,
+            l.numero_chamada,
+            a.nome AS autor_nome
+        FROM livros l
+        INNER JOIN autores a
+            ON a.id = l.autor_id
+        WHERE l.titulo ILIKE '%' || $1 || '%'
+        ORDER BY l.titulo;
+        `,
+      [titulo],
+    );
+
+    return result.rows;
+  }
+
   async buscarPorAutor(autorId: number): Promise<Livro[]> {
     const result = await pool.query<Livro>(
       `
@@ -90,6 +173,28 @@ export class LivroRepository {
             WHERE autor_id = $1
             ORDER BY titulo
             `,
+      [autorId],
+    );
+
+    return result.rows;
+  }
+
+  async buscarPorAutorComAutor(autorId: number): Promise<LivroComAutorDTO[]> {
+    const result = await pool.query<LivroComAutorDTO>(
+      `
+        SELECT
+            l.id,
+            l.titulo,
+            l.isbn,
+            l.ano_publicacao,
+            l.numero_chamada,
+            a.nome AS autor_nome
+        FROM livros l
+        INNER JOIN autores a
+            ON a.id = l.autor_id
+        WHERE l.autor_id = $1
+        ORDER BY l.titulo;
+        `,
       [autorId],
     );
 
@@ -118,6 +223,30 @@ export class LivroRepository {
     return result.rows;
   }
 
+  async buscarPorNomeAutorComAutor(
+    nomeAutor: string,
+  ): Promise<LivroComAutorDTO[]> {
+    const result = await pool.query<LivroComAutorDTO>(
+      `
+        SELECT
+            l.id,
+            l.titulo,
+            l.isbn,
+            l.ano_publicacao,
+            l.numero_chamada,
+            a.nome AS autor_nome
+        FROM livros l
+        INNER JOIN autores a
+            ON a.id = l.autor_id
+        WHERE a.nome ILIKE $1
+        ORDER BY l.titulo;
+        `,
+      [`%${nomeAutor}%`],
+    );
+
+    return result.rows;
+  }
+
   async buscarPorNumeroChamada(numeroChamada: string): Promise<Livro[]> {
     const result = await pool.query<Livro>(
       `
@@ -132,6 +261,30 @@ export class LivroRepository {
             WHERE numero_chamada = $1
             ORDER BY titulo
             `,
+      [numeroChamada],
+    );
+
+    return result.rows;
+  }
+
+  async buscarPorNumeroChamadaComAutor(
+    numeroChamada: string,
+  ): Promise<LivroComAutorDTO[]> {
+    const result = await pool.query(
+      `
+        SELECT
+            l.id,
+            l.titulo,
+            l.isbn,
+            l.ano_publicacao,
+            l.numero_chamada,
+            a.nome AS autor_nome
+        FROM livros l
+        INNER JOIN autores a
+            ON a.id = l.autor_id
+        WHERE l.numero_chamada = $1
+        ORDER BY l.titulo;
+        `,
       [numeroChamada],
     );
 

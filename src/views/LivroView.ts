@@ -4,6 +4,7 @@ import { confirm, input, select } from "@inquirer/prompts";
 import { LivroController } from "../controllers/LivroController";
 import { AutorController } from "../controllers/AutorController";
 import { Livro } from "../models/Livro";
+import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
 
 enum OpcoesMenuLivros {
   buscar,
@@ -128,7 +129,7 @@ export class LivroView {
 
     switch (selecao) {
       case ModoBusca.listar:
-        this.mostrarLivros(await this.livroController.listar());
+        this.mostrarLivros(await this.livroController.listarComAutor());
         break;
 
       case ModoBusca.titulo: {
@@ -136,7 +137,9 @@ export class LivroView {
           message: "Título do livro:",
         });
 
-        this.mostrarLivros(await this.livroController.buscarPorTitulo(titulo));
+        this.mostrarLivros(
+          await this.livroController.buscarPorTituloComAutor(titulo),
+        );
         break;
       }
 
@@ -151,7 +154,7 @@ export class LivroView {
           throw new Error("O ID deve ser um número inteiro maior que zero.");
         }
 
-        const livro = await this.livroController.buscarPorId(id);
+        const livro = await this.livroController.buscarPorIdComAutor(id);
 
         this.mostrarLivros(livro ? [livro] : []);
 
@@ -163,7 +166,7 @@ export class LivroView {
           message: "ISBN do livro:",
         });
 
-        const livro = await this.livroController.buscarPorIsbn(isbn);
+        const livro = await this.livroController.buscarPorIsbnComAutor(isbn);
 
         this.mostrarLivros(livro ? [livro] : []);
 
@@ -176,7 +179,7 @@ export class LivroView {
         });
 
         this.mostrarLivros(
-          await this.livroController.buscarPorNomeAutor(nomeAutor),
+          await this.livroController.buscarPorNomeAutorComAutor(nomeAutor),
         );
 
         break;
@@ -188,7 +191,9 @@ export class LivroView {
         });
 
         this.mostrarLivros(
-          await this.livroController.buscarPorNumeroChamada(numeroChamada),
+          await this.livroController.buscarPorNumeroChamadaComAutor(
+            numeroChamada,
+          ),
         );
 
         break;
@@ -199,14 +204,17 @@ export class LivroView {
     }
   }
 
-  private mostrarLivros(livros: Livro[]): void {
+  private mostrarLivros(livros: Livro[] | LivroComAutorDTO[]): void {
     if (livros.length === 0) {
       console.log("Nenhum livro encontrado.");
       return;
     }
 
+    const labelColunaAutor =
+      "autor_id" in livros[0]! ? "AutorID" : "Nome do autor";
+
     const tabela = new Table({
-      head: ["ID", "Título", "ISBN", "Ano", "Nº chamada", "AutorID"],
+      head: ["ID", "Título", "ISBN", "Ano", "Nº chamada", labelColunaAutor],
     });
 
     for (const livro of livros) {
@@ -216,7 +224,7 @@ export class LivroView {
         livro.isbn ?? "-",
         livro.ano_publicacao ?? "-",
         livro.numero_chamada ?? "-",
-        livro.autor_id,
+        "autor_id" in livro ? livro.autor_id : livro.autor_nome,
       ]);
     }
 

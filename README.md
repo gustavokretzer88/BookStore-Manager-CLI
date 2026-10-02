@@ -10,25 +10,25 @@ A aplicação permite gerenciar autores, livros, exemplares, clientes e emprést
 
 ## 📋 Sumário
 
-* [Sobre o projeto](#-sobre-o-projeto)
-* [Funcionalidades](#-funcionalidades)
-* [Tecnologias e ferramentas](#-tecnologias-e-ferramentas)
-* [Arquitetura](#-arquitetura)
-* [Estrutura do projeto](#-estrutura-do-projeto)
-* [Modelo de dados](#-modelo-de-dados)
-* [Configuração do ambiente](#-configuração-do-ambiente)
-* [Configuração do PostgreSQL](#-configuração-do-postgresql)
-* [Instalação](#-instalação)
-* [Inicialização do banco de dados](#-inicialização-do-banco-de-dados)
-* [População do banco](#-população-do-banco)
-* [Execução em desenvolvimento](#-execução-em-desenvolvimento)
-* [Compilação](#-compilação)
-* [Execução da versão compilada](#-execução-da-versão-compilada)
-* [Comandos disponíveis](#-comandos-disponíveis)
-* [Fluxo da aplicação](#-fluxo-da-aplicação)
-* [Decisões arquiteturais](#-decisões-arquiteturais)
-* [Controle de versão](#-controle-de-versão)
-* [Autor](#-autor)
+- [Sobre o projeto](#-sobre-o-projeto)
+- [Funcionalidades](#-funcionalidades)
+- [Tecnologias e ferramentas](#-tecnologias-e-ferramentas)
+- [Arquitetura](#-arquitetura)
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Modelo de dados](#-modelo-de-dados)
+- [Configuração do ambiente](#-configuração-do-ambiente)
+- [Configuração do PostgreSQL](#-configuração-do-postgresql)
+- [Instalação](#-instalação)
+- [Inicialização do banco de dados](#-inicialização-do-banco-de-dados)
+- [População do banco](#-população-do-banco)
+- [Execução em desenvolvimento](#-execução-em-desenvolvimento)
+- [Compilação](#-compilação)
+- [Execução da versão compilada](#-execução-da-versão-compilada)
+- [Comandos disponíveis](#-comandos-disponíveis)
+- [Fluxo da aplicação](#-fluxo-da-aplicação)
+- [Decisões arquiteturais](#-decisões-arquiteturais)
+- [Controle de versão](#-controle-de-versão)
+- [Autor](#-autor)
 
 ---
 
@@ -62,15 +62,15 @@ A aplicação é executada através do terminal e utiliza menus interativos para
 
 Permite:
 
-* cadastrar autores;
-* listar autores;
-* buscar autores por ID;
-* buscar autores por nome;
-* atualizar autores;
-* remover autores;
-* informar nacionalidade;
-* informar ano de nascimento;
-* informar ano de falecimento.
+- cadastrar autores;
+- listar autores;
+- buscar autores por ID;
+- buscar autores por nome;
+- atualizar autores;
+- remover autores;
+- informar nacionalidade;
+- informar ano de nascimento;
+- informar ano de falecimento.
 
 Os anos de nascimento e falecimento são opcionais e possuem validações de consistência.
 
@@ -80,16 +80,16 @@ Os anos de nascimento e falecimento são opcionais e possuem validações de con
 
 Permite:
 
-* cadastrar livros;
-* listar livros;
-* buscar livros por ID;
-* buscar livros por título;
-* buscar livros por autor;
-* buscar livros pelo nome do autor;
-* buscar livros pelo número de chamada;
-* buscar livros pelo ISBN;
-* atualizar livros;
-* remover livros.
+- cadastrar livros;
+- listar livros;
+- buscar livros por ID;
+- buscar livros por título;
+- buscar livros por autor;
+- buscar livros pelo nome do autor;
+- buscar livros pelo número de chamada;
+- buscar livros pelo ISBN;
+- atualizar livros;
+- remover livros.
 
 Um livro possui um autor associado.
 
@@ -101,15 +101,15 @@ Um livro pode possuir diversos exemplares físicos.
 
 Permite:
 
-* cadastrar exemplares;
-* listar exemplares;
-* buscar por ID;
-* buscar por código;
-* buscar por livro;
-* buscar por estado de conservação;
-* listar exemplares disponíveis;
-* atualizar exemplares;
-* remover exemplares.
+- cadastrar exemplares;
+- listar exemplares;
+- buscar por ID;
+- buscar por código;
+- buscar por livro;
+- buscar por estado de conservação;
+- listar exemplares disponíveis;
+- atualizar exemplares;
+- remover exemplares.
 
 Os estados de conservação disponíveis são:
 
@@ -128,13 +128,13 @@ Cada exemplar possui um código único.
 
 Permite:
 
-* cadastrar clientes;
-* listar clientes;
-* buscar por ID;
-* buscar por nome;
-* buscar por e-mail;
-* atualizar clientes;
-* remover clientes.
+- cadastrar clientes;
+- listar clientes;
+- buscar por ID;
+- buscar por nome;
+- buscar por e-mail;
+- atualizar clientes;
+- remover clientes.
 
 O e-mail do cliente é único no banco de dados.
 
@@ -144,14 +144,14 @@ O e-mail do cliente é único no banco de dados.
 
 Permite:
 
-* realizar empréstimos;
-* listar empréstimos;
-* buscar empréstimo por ID;
-* buscar empréstimos por cliente;
-* buscar empréstimos por exemplar;
-* listar empréstimos ativos;
-* devolver exemplares;
-* remover registros de empréstimos.
+- realizar empréstimos;
+- listar empréstimos;
+- buscar empréstimo por ID;
+- buscar empréstimos por cliente;
+- buscar empréstimos por exemplar;
+- listar empréstimos ativos;
+- devolver exemplares;
+- remover registros de empréstimos.
 
 Um empréstimo é considerado **ativo** quando:
 
@@ -189,16 +189,16 @@ O PostgreSQL é utilizado como sistema gerenciador de banco de dados relacional.
 
 A aplicação utiliza:
 
-* chaves primárias;
-* chaves estrangeiras;
-* restrições `CHECK`;
-* restrições `UNIQUE`;
-* índices;
-* relacionamentos entre entidades;
-* consultas parametrizadas;
-* `ILIKE` para pesquisas textuais;
-* `NULL` para representar informações opcionais;
-* índice parcial para impedir múltiplos empréstimos ativos do mesmo exemplar.
+- chaves primárias;
+- chaves estrangeiras;
+- restrições `CHECK`;
+- restrições `UNIQUE`;
+- índices;
+- relacionamentos entre entidades;
+- consultas parametrizadas;
+- `ILIKE` para pesquisas textuais;
+- `NULL` para representar informações opcionais;
+- índice parcial para impedir múltiplos empréstimos ativos do mesmo exemplar.
 
 ---
 
@@ -232,9 +232,9 @@ O pacote `@inquirer/prompts` é utilizado para criar a interface interativa da a
 
 Ele fornece componentes como:
 
-* `input`;
-* `select`;
-* `confirm`.
+- `input`;
+- `select`;
+- `confirm`.
 
 As Views utilizam esses componentes para coletar informações do usuário.
 
@@ -353,12 +353,12 @@ MenuPrincipal
 
 As Views:
 
-* apresentam menus;
-* solicitam dados;
-* apresentam resultados;
-* utilizam `Inquirer`;
-* exibem tabelas;
-* solicitam confirmações.
+- apresentam menus;
+- solicitam dados;
+- apresentam resultados;
+- utilizam `Inquirer`;
+- exibem tabelas;
+- solicitam confirmações.
 
 As Views **não executam SQL** e não contém regras de negócio.
 
@@ -388,17 +388,17 @@ Concentra as regras de negócio da aplicação.
 
 Exemplos de validações realizadas pelos Services:
 
-* IDs devem ser maiores que zero;
-* campos obrigatórios não podem estar vazios;
-* autores precisam existir antes de um livro ser cadastrado;
-* livros precisam existir antes de exemplares serem cadastrados;
-* clientes precisam existir antes de empréstimos;
-* exemplares precisam existir;
-* exemplares emprestados não podem possuir outro empréstimo ativo;
-* ISBNs não podem ser duplicados;
-* e-mails de clientes não podem ser duplicados;
-* datas precisam ser válidas;
-* ano de falecimento não pode ser anterior ao ano de nascimento.
+- IDs devem ser maiores que zero;
+- campos obrigatórios não podem estar vazios;
+- autores precisam existir antes de um livro ser cadastrado;
+- livros precisam existir antes de exemplares serem cadastrados;
+- clientes precisam existir antes de empréstimos;
+- exemplares precisam existir;
+- exemplares emprestados não podem possuir outro empréstimo ativo;
+- ISBNs não podem ser duplicados;
+- e-mails de clientes não podem ser duplicados;
+- datas precisam ser válidas;
+- ano de falecimento não pode ser anterior ao ano de nascimento.
 
 Essa separação permite manter as regras de negócio independentes da interface CLI.
 
@@ -420,22 +420,22 @@ EmprestimoRepository
 
 Eles:
 
-* executam comandos SQL;
-* recebem parâmetros;
-* retornam entidades;
-* encapsulam o acesso ao PostgreSQL;
-* tratam particularidades específicas do banco.
+- executam comandos SQL;
+- recebem parâmetros;
+- retornam entidades;
+- encapsulam o acesso ao PostgreSQL;
+- tratam particularidades específicas do banco.
 
 As consultas utilizam parâmetros do PostgreSQL:
 
 ```typescript
 await pool.query(
-    `
+  `
     SELECT *
     FROM livros
     WHERE id = $1
     `,
-    [id]
+  [id],
 );
 ```
 
@@ -612,10 +612,10 @@ A separação entre `livros` e `exemplares` permite representar corretamente uma
 
 É necessário possuir instalado:
 
-* **Node.js**
-* **npm**
-* **PostgreSQL**
-* **Git**
+- **Node.js**
+- **npm**
+- **PostgreSQL**
+- **Git**
 
 Também é necessário possuir um usuário do PostgreSQL com permissão para criar o banco de dados utilizado pela aplicação.
 
@@ -1016,10 +1016,10 @@ Livro
 
 Isso permite controlar individualmente:
 
-* código do exemplar;
-* estado de conservação;
-* disponibilidade;
-* empréstimos.
+- código do exemplar;
+- estado de conservação;
+- disponibilidade;
+- empréstimos.
 
 ---
 
@@ -1045,10 +1045,10 @@ As regras importantes também são protegidas pelo PostgreSQL.
 
 Entre elas:
 
-* `PRIMARY KEY`;
-* `FOREIGN KEY`;
-* `UNIQUE`;
-* `CHECK`.
+- `PRIMARY KEY`;
+- `FOREIGN KEY`;
+- `UNIQUE`;
+- `CHECK`.
 
 A aplicação também possui validações na camada Service.
 
@@ -1092,12 +1092,12 @@ O projeto utiliza consultas parametrizadas:
 
 ```typescript
 pool.query(
-    `
+  `
     SELECT *
     FROM livros
     WHERE id = $1
     `,
-    [id]
+  [id],
 );
 ```
 
@@ -1105,13 +1105,13 @@ em vez de construir consultas através da concatenação de strings.
 
 Também são utilizadas:
 
-* variáveis de ambiente para credenciais;
-* validação de entrada;
-* restrições de banco de dados;
-* chaves estrangeiras;
-* `UNIQUE`;
-* `CHECK`;
-* separação de responsabilidades.
+- variáveis de ambiente para credenciais;
+- validação de entrada;
+- restrições de banco de dados;
+- chaves estrangeiras;
+- `UNIQUE`;
+- `CHECK`;
+- separação de responsabilidades.
 
 ---
 
