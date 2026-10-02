@@ -4,6 +4,7 @@ import { AutorView } from "./AutoresView";
 import { ClienteView } from "./ClienteView";
 import { ExemplarView } from "./ExemplarView";
 import { EmprestimoView } from "./EmprestimoView";
+import { RelatorioView } from "./RelatorioView";
 
 enum OpcoesMenuPrincipal {
   livros,
@@ -11,6 +12,7 @@ enum OpcoesMenuPrincipal {
   exemplar,
   cliente,
   emprestimo,
+  relatorios,
   sair,
 }
 
@@ -21,6 +23,7 @@ export class MenuPrincipal {
     private readonly clienteView: ClienteView,
     private readonly exemplarView: ExemplarView,
     private readonly emprestimoView: EmprestimoView,
+    private readonly relatoriosView: RelatorioView,
   ) {}
 
   async executar(): Promise<void> {
@@ -28,7 +31,6 @@ export class MenuPrincipal {
 
     while (continuar) {
       const opcao = await this.mostrarOpcoes();
-      console.log("\n");
 
       switch (opcao) {
         case OpcoesMenuPrincipal.livros:
@@ -46,6 +48,8 @@ export class MenuPrincipal {
         case OpcoesMenuPrincipal.emprestimo:
           await this.emprestimoView.executar();
           break;
+        case OpcoesMenuPrincipal.relatorios:
+          await this.relatoriosView.executar();
         case OpcoesMenuPrincipal.sair:
           continuar = false;
           break;
@@ -63,6 +67,7 @@ export class MenuPrincipal {
         { name: "Exemplares", value: OpcoesMenuPrincipal.exemplar },
         { name: "Clientes", value: OpcoesMenuPrincipal.cliente },
         { name: "Empréstimos", value: OpcoesMenuPrincipal.emprestimo },
+        { name: "Relatórios", value: OpcoesMenuPrincipal.relatorios },
         { name: "Sair", value: OpcoesMenuPrincipal.sair },
       ],
     });

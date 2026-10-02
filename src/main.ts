@@ -53,6 +53,10 @@ import { AutorView } from "./views/AutoresView";
 import { ClienteView } from "./views/ClienteView";
 import { ExemplarView } from "./views/ExemplarView";
 import { EmprestimoView } from "./views/EmprestimoView";
+import { RelatorioController } from "./controllers/RelatorioController";
+import { RelatorioService } from "./services/RelatorioService";
+import { RelatorioRepository } from "./repositories/RelatorioRepository";
+import { RelatorioView } from "./views/RelatorioView";
 
 async function main(): Promise<void> {
   // ========================================
@@ -64,6 +68,7 @@ async function main(): Promise<void> {
   const exemplarRepository = new ExemplarRepository();
   const clienteRepository = new ClienteRepository();
   const emprestimoRepository = new EmprestimoRepository();
+  const relatorioRepository = new RelatorioRepository();
 
   // ========================================
   // SERVICES
@@ -86,6 +91,8 @@ async function main(): Promise<void> {
     exemplarRepository,
   );
 
+  const relatorioService = new RelatorioService(relatorioRepository);
+
   // ========================================
   // CONTROLLERS
   // ========================================
@@ -99,6 +106,8 @@ async function main(): Promise<void> {
   const clienteController = new ClienteController(clienteService);
 
   const emprestimoController = new EmprestimoController(emprestimoService);
+
+  const relatorioController = new RelatorioController(relatorioService);
 
   // ========================================
   // VIEWS
@@ -118,6 +127,8 @@ async function main(): Promise<void> {
     exemplarController,
   );
 
+  const relatorioView = new RelatorioView(relatorioController);
+
   // ========================================
   // MENU PRINCIPAL
   // ========================================
@@ -128,6 +139,7 @@ async function main(): Promise<void> {
     clienteView,
     exemplarView,
     emprestimoView,
+    relatorioView,
   );
 
   await menu.executar();
