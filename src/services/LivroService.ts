@@ -13,7 +13,7 @@ export class LivroService {
     return this.livroRepository.buscarTodos();
   }
 
-  async listarLivrosComAutor(): Promise<LivroComAutorDTO[]> {
+  async buscarTodosComAutor(): Promise<LivroComAutorDTO[]> {
     return this.livroRepository.buscarTodosComAutor();
   }
 

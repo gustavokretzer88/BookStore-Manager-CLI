@@ -1,10 +1,10 @@
 import { select } from "@inquirer/prompts";
-import { LivroView } from "./LivroView";
-import { AutorView } from "./AutoresView";
-import { ClienteView } from "./ClienteView";
-import { ExemplarView } from "./ExemplarView";
-import { EmprestimoView } from "./EmprestimoView";
-import { RelatorioView } from "./RelatorioView";
+import { LivroController } from "./LivroController";
+import { AutorController } from "./AutorController";
+import { ClienteController } from "./ClienteController";
+import { ExemplarController } from "./ExemplarController";
+import { EmprestimoController } from "./EmprestimoController";
+import { RelatorioController } from "./RelatorioController";
 
 enum OpcoesMenuPrincipal {
   livros,
@@ -18,12 +18,12 @@ enum OpcoesMenuPrincipal {
 
 export class MenuPrincipal {
   constructor(
-    private readonly livroView: LivroView,
-    private readonly atorView: AutorView,
-    private readonly clienteView: ClienteView,
-    private readonly exemplarView: ExemplarView,
-    private readonly emprestimoView: EmprestimoView,
-    private readonly relatoriosView: RelatorioView,
+    private readonly livroController: LivroController,
+    private readonly atorController: AutorController,
+    private readonly clienteController: ClienteController,
+    private readonly exemplarView: ExemplarController,
+    private readonly emprestimoController: EmprestimoController,
+    private readonly relatoriosController: RelatorioController,
   ) {}
 
   async executar(): Promise<void> {
@@ -34,22 +34,22 @@ export class MenuPrincipal {
 
       switch (opcao) {
         case OpcoesMenuPrincipal.livros:
-          await this.livroView.executar();
+          await this.livroController.executar();
           break;
         case OpcoesMenuPrincipal.autores:
-          await this.atorView.executar();
+          await this.atorController.executar();
           break;
         case OpcoesMenuPrincipal.cliente:
-          await this.clienteView.executar();
+          await this.clienteController.executar();
           break;
         case OpcoesMenuPrincipal.exemplar:
           await this.exemplarView.executar();
           break;
         case OpcoesMenuPrincipal.emprestimo:
-          await this.emprestimoView.executar();
+          await this.emprestimoController.executar();
           break;
         case OpcoesMenuPrincipal.relatorios:
-          await this.relatoriosView.executar();
+          await this.relatoriosController.executar();
         case OpcoesMenuPrincipal.sair:
           continuar = false;
           break;
