@@ -5,6 +5,7 @@ import { Livro } from "../models/Livro";
 import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
 import { LivroService } from "../services/LivroService";
 import { AutorService } from "../services/AutorService";
+import { LivroView } from "../views/LivroView";
 
 enum OpcoesMenuLivros {
   buscar,
@@ -25,6 +26,8 @@ enum ModoBusca {
 }
 
 export class LivroController {
+  private readonly livroView: LivroView = new LivroView();
+
   constructor(
     private readonly livroService: LivroService,
     private readonly autorService: AutorService,
@@ -129,7 +132,9 @@ export class LivroController {
 
     switch (selecao) {
       case ModoBusca.listar:
-        this.mostrarLivros(await this.livroService.buscarTodosComAutor());
+        this.livroView.mostrarLivros(
+          await this.livroService.buscarTodosComAutor(),
+        );
         break;
 
       case ModoBusca.titulo: {
@@ -137,7 +142,7 @@ export class LivroController {
           message: "Título do livro:",
         });
 
-        this.mostrarLivros(
+        this.livroView.mostrarLivros(
           await this.livroService.buscarPorTituloComAutor(titulo),
         );
         break;
@@ -156,7 +161,7 @@ export class LivroController {
 
         const livro = await this.livroService.buscarPorIdComAutor(id);
 
-        this.mostrarLivros(livro ? [livro] : []);
+        this.livroView.mostrarLivros(livro ? [livro] : []);
 
         break;
       }
@@ -168,7 +173,7 @@ export class LivroController {
 
         const livro = await this.livroService.buscarPorIsbnComAutor(isbn);
 
-        this.mostrarLivros(livro ? [livro] : []);
+        this.livroView.mostrarLivros(livro ? [livro] : []);
 
         break;
       }
@@ -178,7 +183,7 @@ export class LivroController {
           message: "Nome do autor:",
         });
 
-        this.mostrarLivros(
+        this.livroView.mostrarLivros(
           await this.livroService.buscarPorNomeAutorComAutor(nomeAutor),
         );
 
@@ -190,10 +195,8 @@ export class LivroController {
           message: "Número de chamada:",
         });
 
-        this.mostrarLivros(
-          await this.livroService.buscarPorNumeroChamadaComAutor(
-            numeroChamada,
-          ),
+        this.livroView.mostrarLivros(
+          await this.livroService.buscarPorNumeroChamadaComAutor(numeroChamada),
         );
 
         break;
@@ -202,33 +205,6 @@ export class LivroController {
       case ModoBusca.sair:
         break;
     }
-  }
-
-  private mostrarLivros(livros: Livro[] | LivroComAutorDTO[]): void {
-    if (livros.length === 0) {
-      console.log("Nenhum livro encontrado.");
-      return;
-    }
-
-    const labelColunaAutor =
-      "autor_id" in livros[0]! ? "AutorID" : "Nome do autor";
-
-    const tabela = new Table({
-      head: ["ID", "Título", "ISBN", "Ano", "Nº chamada", labelColunaAutor],
-    });
-
-    for (const livro of livros) {
-      tabela.push([
-        livro.id,
-        livro.titulo,
-        livro.isbn ?? "-",
-        livro.ano_publicacao ?? "-",
-        livro.numero_chamada ?? "-",
-        "autor_id" in livro ? livro.autor_id : livro.autor_nome,
-      ]);
-    }
-
-    console.log(tabela.toString());
   }
 
   private async adicionar(): Promise<void> {
@@ -288,7 +264,7 @@ export class LivroController {
 
     console.log("\nLivro cadastrado com sucesso!\n");
 
-    this.mostrarLivros([livro]);
+    this.livroView.mostrarLivros([livro]);
   }
 
   private async atualizar(): Promise<void> {
@@ -377,7 +353,7 @@ export class LivroController {
 
     console.log("\nLivro atualizado com sucesso!\n");
 
-    this.mostrarLivros([livroAtualizado]);
+    this.livroView.mostrarLivros([livroAtualizado]);
   }
 
   private async remover(): Promise<void> {
@@ -401,7 +377,7 @@ export class LivroController {
     }
 
     console.log("\nLivro selecionado:");
-    this.mostrarLivros([livro]);
+    this.livroView.mostrarLivros([livro]);
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o livro "${livro.titulo}"?`,

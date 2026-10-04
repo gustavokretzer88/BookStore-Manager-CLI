@@ -139,3 +139,29 @@ CREATE INDEX IF NOT EXISTS idx_emprestimos_exemplar
 CREATE UNIQUE INDEX idx_exemplar_emprestimo_ativo
     ON emprestimos(exemplar_id)
     WHERE data_devolucao IS NULL;
+
+
+-- ============================================================
+-- VIEWS
+-- ============================================================
+
+
+-- ============================================================
+-- View com as informações do livro e autor juntas.
+-- ============================================================
+
+CREATE VIEW vw_livrosEAutor AS
+SELECT
+    l.id,
+    l.titulo,
+    l.isbn,
+    l.ano_publicacao,
+    l.numero_chamada,
+    l.autor_id,
+    a.nome AS autor_nome,
+    a.nacionalidade AS autor_nacionalidade,
+    a.ano_nascimento AS autor_ano_nascimento,
+    a.ano_falecimento AS autor_ano_falecimento
+FROM livros l
+INNER JOIN autores a
+    ON a.id = l.autor_id;

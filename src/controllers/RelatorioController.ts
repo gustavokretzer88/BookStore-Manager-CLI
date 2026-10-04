@@ -1,24 +1,24 @@
-import { select } from "@inquirer/prompts";
-import { LivrosPorAutorDTO } from "../dtos/relatorio/LivrosPorAutorDTO";
-
-import Table from "cli-table3";
-import { EmprestimosPorLivroDTO } from "../dtos/relatorio/EmprestimosPorLivroDTO";
 import { RelatorioService } from "../services/RelatorioService";
-
-enum OpcoesMenuRelatorio {
-  numLivrosPorAutor,
-  numEmprestimoPorLivro,
-  sair,
-}
+import { AutorService } from "../services/AutorService";
+import { ClienteView } from "../views/ClienteView";
+import { AutorView } from "../views/AutorView";
+import { OpcoesMenuRelatorio, RelatorioView } from "../views/RelatorioView";
 
 export class RelatorioController {
-  constructor(private readonly relatorioService: RelatorioService) {}
+  private readonly relatorioView: RelatorioView = new RelatorioView();
+  private readonly clienteView: ClienteView = new ClienteView();
+  private readonly autorView: AutorView = new AutorView();
+
+  constructor(
+    private readonly relatorioService: RelatorioService,
+    private readonly autorService: AutorService,
+  ) {}
 
   async executar(): Promise<void> {
     let continuar = true;
 
     while (continuar) {
-      const opcao = await this.mostrarOpcoes();
+      const opcao = await this.relatorioView.mostrarOpcoes();
 
       switch (opcao) {
         case OpcoesMenuRelatorio.numLivrosPorAutor:
@@ -26,6 +26,18 @@ export class RelatorioController {
           break;
         case OpcoesMenuRelatorio.numEmprestimoPorLivro:
           await this.emprestimoPorLivro();
+          break;
+        case OpcoesMenuRelatorio.livrosDisponiveis:
+          await this.livrosDisponiveis();
+          break;
+        case OpcoesMenuRelatorio.livrosComEmprestimos:
+          await this.livrosComEmprestimos();
+          break;
+        case OpcoesMenuRelatorio.livrosPorAutor:
+          await this.livrosCadastradosPorAutor();
+          break;
+        case OpcoesMenuRelatorio.clientesComEmprestimoAtivo:
+          await this.clientesComEmprestimoAtivo();
           break;
         case OpcoesMenuRelatorio.sair:
           continuar = false;
@@ -35,64 +47,50 @@ export class RelatorioController {
     }
   }
 
-  private async mostrarOpcoes(): Promise<OpcoesMenuRelatorio> {
-    return await select({
-      message: "Gerenciador de livros:",
-      choices: [
-        {
-          name: "Número de livros por autor",
-          value: OpcoesMenuRelatorio.numLivrosPorAutor,
-        },
-        {
-          name: "Número de empréstimo por livro",
-          value: OpcoesMenuRelatorio.numEmprestimoPorLivro,
-        },
-        {
-          name: "Sair",
-          value: OpcoesMenuRelatorio.sair,
-        },
-      ],
-    });
-  }
-
   private async livrosPorAutor(): Promise<void> {
-    this.mostrarLivrosPorAutor(await this.relatorioService.livrosPorAutor());
-  }
-
-  private async emprestimoPorLivro(): Promise<void> {
-    this.mostraEmprestimoPorLivro(
-      await this.relatorioService.buscarEmprestimosPorLivro(),
+    this.relatorioView.mostrarLivrosPorAutor(
+      await this.relatorioService.livrosPorAutor(),
+      "Número de livros por autor:",
     );
   }
 
-  private mostrarLivrosPorAutor(dados: LivrosPorAutorDTO[]): void {
-    if (dados.length === 0) {
-      console.log("Não há dados para serem exibidos");
-      return;
-    }
-
-    const table = new Table({
-      head: ["Autor", "Quantidade de livros"],
-    });
-
-    dados.forEach((item) => {
-      table.push([item.autor_nome, item.quantidade_livros]);
-    });
-
-    console.log(table.toString());
+  private async emprestimoPorLivro(): Promise<void> {
+    this.relatorioView.mostraEmprestimoPorLivro(
+      await this.relatorioService.buscarEmprestimosPorLivro(),
+      "Número de empréstimos por livro:",
+    );
   }
 
-  private mostraEmprestimoPorLivro(dados: EmprestimosPorLivroDTO[]) {
-    if (dados.length === 0) {
-      console.log("Não há dados para serem exibidos");
-      return;
+  private async livrosDisponiveis(): Promise<void> {
+    this.relatorioView.mostraLivrosEAutor(
+      await this.relatorioService.buscarLivrosDisponiveis(),
+      "Livros com exemplares disponível:",
+    );
+  }
+
+  private async livrosComEmprestimos(): Promise<void> {
+    this.relatorioView.mostraLivrosEAutor(
+      await this.relatorioService.buscarLivrosComEmprestimo(),
+      "Livros com exemplares emprestados:",
+    );
+  }
+
+  private async clientesComEmprestimoAtivo(): Promise<void> {
+    this.clienteView.mostrarClientes(
+      await this.relatorioService.clientesComEmprestimoAtivo(),
+      "Clientes com empréstimos ativo:",
+    );
+  }
+
+  private async livrosCadastradosPorAutor(): Promise<void> {
+    const autores = await this.autorService.buscarTodos();
+    if (autores.length === 0) {
+      throw new Error(
+        "Não é possível efetuar a operação pois não existem autores cadastrados.",
+      );
     }
-    const table = new Table({
-      head: ["Livro", "Autor", "Empréstimos"],
-    });
-    dados.forEach((item) => {
-      table.push([item.titulo, item.autor_nome, item.quantidade_emprestimos]);
-    });
-    console.log(table.toString());
+    this.autorView.mostrarAutores([
+      await this.autorView.selecionaAutor(autores),
+    ]);
   }
 }

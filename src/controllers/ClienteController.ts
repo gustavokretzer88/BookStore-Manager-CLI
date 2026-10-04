@@ -1,18 +1,11 @@
 import { confirm, input, select } from "@inquirer/prompts";
-import Table from "cli-table3";
 
-import { Cliente } from "../models/Cliente";
 import { ClienteService } from "../services/ClienteService";
-
-enum OpcoesMenuCliente {
-  buscar,
-  adicionar,
-  atualizar,
-  remover,
-  sair,
-}
+import { ClienteView, OpcoesMenuCliente } from "../views/ClienteView";
 
 export class ClienteController {
+  private readonly clienteView: ClienteView = new ClienteView();
+
   constructor(private readonly clienteService: ClienteService) {}
 
   async executar(): Promise<void> {
@@ -20,7 +13,7 @@ export class ClienteController {
 
     while (continuar) {
       try {
-        const opcao = await this.mostrarOpcoes();
+        const opcao = await this.clienteView.mostrarOpcoes();
 
         switch (opcao) {
           case OpcoesMenuCliente.buscar:
@@ -47,34 +40,6 @@ export class ClienteController {
         console.error("\nErro:", erro instanceof Error ? erro.message : erro);
       }
     }
-  }
-
-  private async mostrarOpcoes(): Promise<OpcoesMenuCliente> {
-    return await select({
-      message: "Gerenciador de clientes:",
-      choices: [
-        {
-          name: "Buscar",
-          value: OpcoesMenuCliente.buscar,
-        },
-        {
-          name: "Adicionar",
-          value: OpcoesMenuCliente.adicionar,
-        },
-        {
-          name: "Atualizar",
-          value: OpcoesMenuCliente.atualizar,
-        },
-        {
-          name: "Remover",
-          value: OpcoesMenuCliente.remover,
-        },
-        {
-          name: "Sair",
-          value: OpcoesMenuCliente.sair,
-        },
-      ],
-    });
   }
 
   private async buscar(): Promise<void> {
@@ -116,7 +81,7 @@ export class ClienteController {
       case ModoBusca.listar: {
         const clientes = await this.clienteService.buscarTodos();
 
-        this.mostrarClientes(clientes);
+        this.clienteView.mostrarClientes(clientes);
         break;
       }
 
@@ -133,7 +98,7 @@ export class ClienteController {
 
         const cliente = await this.clienteService.buscarPorId(id);
 
-        this.mostrarClientes(cliente ? [cliente] : []);
+        this.clienteView.mostrarClientes(cliente ? [cliente] : []);
 
         break;
       }
@@ -145,7 +110,7 @@ export class ClienteController {
 
         const clientes = await this.clienteService.buscarPorNome(nome);
 
-        this.mostrarClientes(clientes);
+        this.clienteView.mostrarClientes(clientes);
         break;
       }
 
@@ -156,7 +121,7 @@ export class ClienteController {
 
         const cliente = await this.clienteService.buscarPorEmail(email);
 
-        this.mostrarClientes(cliente ? [cliente] : []);
+        this.clienteView.mostrarClientes(cliente ? [cliente] : []);
 
         break;
       }
@@ -189,7 +154,7 @@ export class ClienteController {
 
     console.log("\nCliente cadastrado com sucesso!\n");
 
-    this.mostrarClientes([cliente]);
+    this.clienteView.mostrarClientes([cliente]);
   }
 
   private async atualizar(): Promise<void> {
@@ -213,7 +178,7 @@ export class ClienteController {
     }
 
     console.log("\nCliente selecionado:");
-    this.mostrarClientes([cliente]);
+    this.clienteView.mostrarClientes([cliente]);
 
     const nome = await input({
       message: "Nome:",
@@ -244,7 +209,7 @@ export class ClienteController {
 
     console.log("\nCliente atualizado com sucesso!\n");
 
-    this.mostrarClientes([clienteAtualizado]);
+    this.clienteView.mostrarClientes([clienteAtualizado]);
   }
 
   private async remover(): Promise<void> {
@@ -268,7 +233,7 @@ export class ClienteController {
     }
 
     console.log("\nCliente selecionado:");
-    this.mostrarClientes([cliente]);
+    this.clienteView.mostrarClientes([cliente]);
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o cliente "${cliente.nome}"?`,
@@ -288,27 +253,5 @@ export class ClienteController {
     }
 
     console.log("\nCliente removido com sucesso!\n");
-  }
-
-  private mostrarClientes(clientes: Cliente[]): void {
-    if (clientes.length === 0) {
-      console.log("\nNenhum cliente encontrado.\n");
-      return;
-    }
-
-    const tabela = new Table({
-      head: ["ID", "Nome", "E-mail", "Telefone"],
-    });
-
-    for (const cliente of clientes) {
-      tabela.push([
-        cliente.id,
-        cliente.nome,
-        cliente.email,
-        cliente.telefone ?? "-",
-      ]);
-    }
-
-    console.log(tabela.toString());
   }
 }

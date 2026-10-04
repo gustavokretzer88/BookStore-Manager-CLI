@@ -4,16 +4,14 @@ import Table from "cli-table3";
 import { Exemplar, EstadoConservacao } from "../models/Exemplar";
 import { ExemplarService } from "../services/ExemplarService";
 import { LivroService } from "../services/LivroService";
-
-enum OpcoesMenuExemplar {
-  buscar,
-  adicionar,
-  atualizar,
-  remover,
-  sair,
-}
+import {
+  ExemplarView,
+  OpcoesBuscarExemplarPor,
+  OpcoesMenuExemplar,
+} from "../views/ExemplarView";
 
 export class ExemplarController {
+  private readonly exemplarView: ExemplarView = new ExemplarView();
   constructor(
     private readonly exemplarService: ExemplarService,
     private readonly livroService: LivroService,
@@ -24,7 +22,7 @@ export class ExemplarController {
 
     while (continuar) {
       try {
-        const opcao = await this.mostrarOpcoes();
+        const opcao = await this.exemplarView.mostrarOpcoes();
 
         switch (opcao) {
           case OpcoesMenuExemplar.buscar:
@@ -53,88 +51,18 @@ export class ExemplarController {
     }
   }
 
-  private async mostrarOpcoes(): Promise<OpcoesMenuExemplar> {
-    return await select({
-      message: "Gerenciador de exemplares:",
-      choices: [
-        {
-          name: "Buscar",
-          value: OpcoesMenuExemplar.buscar,
-        },
-        {
-          name: "Adicionar",
-          value: OpcoesMenuExemplar.adicionar,
-        },
-        {
-          name: "Atualizar",
-          value: OpcoesMenuExemplar.atualizar,
-        },
-        {
-          name: "Remover",
-          value: OpcoesMenuExemplar.remover,
-        },
-        {
-          name: "Sair",
-          value: OpcoesMenuExemplar.sair,
-        },
-      ],
-    });
-  }
-
   private async buscar(): Promise<void> {
-    enum ModoBusca {
-      listar,
-      id,
-      codigo,
-      livro,
-      estado,
-      disponiveis,
-      sair,
-    }
-
-    const selecao = await select({
-      message: "Buscar exemplar por:",
-      choices: [
-        {
-          name: "Listar todos",
-          value: ModoBusca.listar,
-        },
-        {
-          name: "ID",
-          value: ModoBusca.id,
-        },
-        {
-          name: "Código",
-          value: ModoBusca.codigo,
-        },
-        {
-          name: "Livro",
-          value: ModoBusca.livro,
-        },
-        {
-          name: "Estado de conservação",
-          value: ModoBusca.estado,
-        },
-        {
-          name: "Disponíveis",
-          value: ModoBusca.disponiveis,
-        },
-        {
-          name: "Sair",
-          value: ModoBusca.sair,
-        },
-      ],
-    });
+    const selecao = await this.exemplarView.mostrarOpcoesBusca();
 
     switch (selecao) {
-      case ModoBusca.listar: {
+      case OpcoesBuscarExemplarPor.todos: {
         const exemplares = await this.exemplarService.buscarTodos();
 
         this.mostrarExemplares(exemplares);
         break;
       }
 
-      case ModoBusca.id: {
+      case OpcoesBuscarExemplarPor.id: {
         const resposta = await input({
           message: "ID do exemplar:",
         });
@@ -152,7 +80,7 @@ export class ExemplarController {
         break;
       }
 
-      case ModoBusca.codigo: {
+      case OpcoesBuscarExemplarPor.codigo: {
         const codigo = await input({
           message: "Código do exemplar:",
         });
@@ -164,7 +92,7 @@ export class ExemplarController {
         break;
       }
 
-      case ModoBusca.livro: {
+      case OpcoesBuscarExemplarPor.livro: {
         const livros = await this.livroService.buscarTodos();
 
         if (livros.length === 0) {
@@ -180,26 +108,24 @@ export class ExemplarController {
           })),
         });
 
-        const exemplares =
-          await this.exemplarService.buscarPorLivro(livroId);
+        const exemplares = await this.exemplarService.buscarPorLivro(livroId);
 
         this.mostrarExemplares(exemplares);
 
         break;
       }
 
-      case ModoBusca.estado: {
+      case OpcoesBuscarExemplarPor.estado: {
         const estado = await this.selecionarEstado();
 
-        const exemplares =
-          await this.exemplarService.buscarPorEstado(estado);
+        const exemplares = await this.exemplarService.buscarPorEstado(estado);
 
         this.mostrarExemplares(exemplares);
 
         break;
       }
 
-      case ModoBusca.disponiveis: {
+      case OpcoesBuscarExemplarPor.disponiveis: {
         const exemplares = await this.exemplarService.buscarDisponiveis();
 
         this.mostrarExemplares(exemplares);
@@ -207,7 +133,7 @@ export class ExemplarController {
         break;
       }
 
-      case ModoBusca.sair:
+      case OpcoesBuscarExemplarPor.sair:
         break;
     }
   }

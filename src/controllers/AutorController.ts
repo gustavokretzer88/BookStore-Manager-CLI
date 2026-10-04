@@ -3,16 +3,15 @@ import Table from "cli-table3";
 
 import { Autor } from "../models/Autor";
 import { AutorService } from "../services/AutorService";
-
-enum OpcoesMenuAutor {
-  buscar,
-  adicionar,
-  atualizar,
-  remover,
-  sair,
-}
+import {
+  AutorView,
+  OpcoesBuscarAutorPor,
+  OpcoesMenuAutor,
+} from "../views/AutorView";
 
 export class AutorController {
+  private readonly autorView: AutorView = new AutorView();
+
   constructor(private readonly autorService: AutorService) {}
 
   async executar(): Promise<void> {
@@ -20,25 +19,21 @@ export class AutorController {
 
     while (continuar) {
       try {
-        const opcao = await this.mostrarOpcoes();
+        const opcao = await this.autorView.mostrarOpcoes();
 
         switch (opcao) {
           case OpcoesMenuAutor.buscar:
             await this.buscar();
             break;
-
           case OpcoesMenuAutor.adicionar:
             await this.adicionar();
             break;
-
           case OpcoesMenuAutor.atualizar:
             await this.atualizar();
             break;
-
           case OpcoesMenuAutor.remover:
             await this.remover();
             break;
-
           case OpcoesMenuAutor.sair:
             continuar = false;
             break;
@@ -49,73 +44,16 @@ export class AutorController {
     }
   }
 
-  private async mostrarOpcoes(): Promise<OpcoesMenuAutor> {
-    return await select({
-      message: "Gerenciador de autores:",
-      choices: [
-        {
-          name: "Buscar",
-          value: OpcoesMenuAutor.buscar,
-        },
-        {
-          name: "Adicionar",
-          value: OpcoesMenuAutor.adicionar,
-        },
-        {
-          name: "Atualizar",
-          value: OpcoesMenuAutor.atualizar,
-        },
-        {
-          name: "Remover",
-          value: OpcoesMenuAutor.remover,
-        },
-        {
-          name: "Sair",
-          value: OpcoesMenuAutor.sair,
-        },
-      ],
-    });
-  }
-
   private async buscar(): Promise<void> {
-    enum ModoBusca {
-      listar,
-      id,
-      nome,
-      sair,
-    }
-
-    const selecao = await select({
-      message: "Buscar autor por:",
-      choices: [
-        {
-          name: "Listar todos",
-          value: ModoBusca.listar,
-        },
-        {
-          name: "ID",
-          value: ModoBusca.id,
-        },
-        {
-          name: "Nome",
-          value: ModoBusca.nome,
-        },
-        {
-          name: "Sair",
-          value: ModoBusca.sair,
-        },
-      ],
-    });
+    const selecao = await this.autorView.mostraOpcoesBuscarAutorPor();
 
     switch (selecao) {
-      case ModoBusca.listar: {
+      case OpcoesBuscarAutorPor.listar: {
         const autores = await this.autorService.buscarTodos();
-
-        this.mostrarAutores(autores);
+        this.autorView.mostrarAutores(autores);
         break;
       }
-
-      case ModoBusca.id: {
+      case OpcoesBuscarAutorPor.id: {
         const resposta = await input({
           message: "ID do autor:",
         });
@@ -128,24 +66,23 @@ export class AutorController {
 
         const autor = await this.autorService.buscarPorId(id);
 
-        this.mostrarAutores(autor ? [autor] : []);
+        this.autorView.mostrarAutores(autor ? [autor] : []);
 
         break;
       }
-
-      case ModoBusca.nome: {
+      case OpcoesBuscarAutorPor.nome: {
         const nome = await input({
           message: "Nome do autor:",
         });
 
         const autores = await this.autorService.buscarPorNome(nome);
 
-        this.mostrarAutores(autores);
+        this.autorView.mostrarAutores(autores);
 
         break;
       }
 
-      case ModoBusca.sair:
+      case OpcoesBuscarAutorPor.sair:
         break;
     }
   }
@@ -188,7 +125,7 @@ export class AutorController {
 
     console.log("\nAutor cadastrado com sucesso!\n");
 
-    this.mostrarAutores([autor]);
+    this.autorView.mostrarAutores([autor]);
   }
 
   private async atualizar(): Promise<void> {
@@ -212,7 +149,7 @@ export class AutorController {
     }
 
     console.log("\nAutor selecionado:");
-    this.mostrarAutores([autor]);
+    this.autorView.mostrarAutores([autor]);
 
     const nome = await input({
       message: "Nome:",
@@ -259,7 +196,7 @@ export class AutorController {
 
     console.log("\nAutor atualizado com sucesso!\n");
 
-    this.mostrarAutores([autorAtualizado]);
+    this.autorView.mostrarAutores([autorAtualizado]);
   }
 
   private async remover(): Promise<void> {
@@ -283,7 +220,7 @@ export class AutorController {
     }
 
     console.log("\nAutor selecionado:");
-    this.mostrarAutores([autor]);
+    this.autorView.mostrarAutores([autor]);
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o autor "${autor.nome}"?`,
@@ -303,29 +240,6 @@ export class AutorController {
     }
 
     console.log("\nAutor removido com sucesso!\n");
-  }
-
-  private mostrarAutores(autores: Autor[]): void {
-    if (autores.length === 0) {
-      console.log("\nNenhum autor encontrado.\n");
-      return;
-    }
-
-    const tabela = new Table({
-      head: ["ID", "Nome", "Nacionalidade", "Nascimento", "Falecimento"],
-    });
-
-    for (const autor of autores) {
-      tabela.push([
-        autor.id,
-        autor.nome,
-        autor.nacionalidade ?? "-",
-        autor.ano_nascimento ?? "-",
-        autor.ano_falecimento ?? "-",
-      ]);
-    }
-
-    console.log(tabela.toString());
   }
 
   private converterAnoOpcional(valor: string, tipo: string): number | null {

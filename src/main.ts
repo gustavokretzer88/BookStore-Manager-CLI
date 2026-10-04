@@ -12,7 +12,6 @@ import { ExemplarRepository } from "./repositories/ExemplarRepository";
 import { ClienteRepository } from "./repositories/ClienteRepository";
 import { EmprestimoRepository } from "./repositories/EmprestimoRepository";
 
-
 import { RelatorioService } from "./services/RelatorioService";
 import { RelatorioRepository } from "./repositories/RelatorioRepository";
 import { AutorController } from "./controllers/AutorController";
@@ -21,6 +20,7 @@ import { ExemplarController } from "./controllers/ExemplarController";
 import { ClienteController } from "./controllers/ClienteController";
 import { EmprestimoController } from "./controllers/EmprestimoController";
 import { RelatorioController } from "./controllers/RelatorioController";
+import { Input } from "./cli/Input";
 
 async function main(): Promise<void> {
   // ========================================
@@ -65,14 +65,23 @@ async function main(): Promise<void> {
 
   const livroController = new LivroController(livroService, autorService);
 
-  const exemplarController = new ExemplarController(exemplarService, livroService);
+  const exemplarController = new ExemplarController(
+    exemplarService,
+    livroService,
+  );
 
   const clienteController = new ClienteController(clienteService);
 
-  const emprestimoController = new EmprestimoController(emprestimoService, clienteService, exemplarService);
+  const emprestimoController = new EmprestimoController(
+    emprestimoService,
+    clienteService,
+    exemplarService,
+  );
 
-  const relatorioController = new RelatorioController(relatorioService);
-
+  const relatorioController = new RelatorioController(
+    relatorioService,
+    autorService,
+  );
 
   // // ========================================
   // // MENU PRINCIPAL

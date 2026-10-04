@@ -1,34 +1,18 @@
 import { confirm, input, select } from "@inquirer/prompts";
-import Table from "cli-table3";
-
-
 import { Emprestimo } from "../models/Emprestimo";
-import { Cliente } from "../models/Cliente";
-import { Exemplar } from "../models/Exemplar";
-
 import { formatData } from "../utils/FormatData";
 import { EmprestimoService } from "../services/EmprestimoService";
 import { ClienteService } from "../services/ClienteService";
 import { ExemplarService } from "../services/ExemplarService";
-
-enum OpcoesMenuEmprestimo {
-  buscar,
-  realizar,
-  devolver,
-  remover,
-  sair,
-}
-
-enum OpcoesBuscarEmprestimo {
-  listar,
-  id,
-  cliente,
-  exemplar,
-  ativos,
-  sair,
-}
+import {
+  OpcoesMenuEmprestimo,
+  OpcoesBuscarEmprestimo,
+  EmprestimoView,
+} from "../views/EmprestimoView";
+import { dataAtual } from "../utils/DataAtual";
 
 export class EmprestimoController {
+  private readonly emprestimoView: EmprestimoView = new EmprestimoView();
   constructor(
     private readonly emprestimoService: EmprestimoService,
     private readonly clienteService: ClienteService,
@@ -40,7 +24,7 @@ export class EmprestimoController {
 
     while (continuar) {
       try {
-        const opcao = await this.mostrarOpcoes();
+        const opcao = await this.emprestimoView.mostrarOpcoes();
 
         switch (opcao) {
           case OpcoesMenuEmprestimo.buscar:
@@ -69,90 +53,27 @@ export class EmprestimoController {
     }
   }
 
-  private async mostrarOpcoes(): Promise<OpcoesMenuEmprestimo> {
-    return await select({
-      message: "Gerenciamento de empréstimos:",
-      choices: [
-        {
-          name: "Buscar empréstimos",
-          value: OpcoesMenuEmprestimo.buscar,
-        },
-        {
-          name: "Realizar empréstimo",
-          value: OpcoesMenuEmprestimo.realizar,
-        },
-        {
-          name: "Devolver exemplar",
-          value: OpcoesMenuEmprestimo.devolver,
-        },
-        {
-          name: "Remover empréstimo",
-          value: OpcoesMenuEmprestimo.remover,
-        },
-        {
-          name: "Voltar",
-          value: OpcoesMenuEmprestimo.sair,
-        },
-      ],
-    });
-  }
-
   private async buscar(): Promise<void> {
     let continuar = true;
 
     while (continuar) {
-      const opcao = await select({
-        message: "Buscar empréstimo por:",
-        choices: [
-          {
-            name: "Listar todos",
-            value: OpcoesBuscarEmprestimo.listar,
-          },
-          {
-            name: "Buscar por ID",
-            value: OpcoesBuscarEmprestimo.id,
-          },
-          {
-            name: "Buscar por cliente",
-            value: OpcoesBuscarEmprestimo.cliente,
-          },
-          {
-            name: "Buscar por exemplar",
-            value: OpcoesBuscarEmprestimo.exemplar,
-          },
-          {
-            name: "Listar empréstimos ativos",
-            value: OpcoesBuscarEmprestimo.ativos,
-          },
-          {
-            name: "Voltar",
-            value: OpcoesBuscarEmprestimo.sair,
-          },
-        ],
-      });
-
       try {
-        switch (opcao) {
+        switch (await this.emprestimoView.mostrarOpcoesBuscarPor()) {
           case OpcoesBuscarEmprestimo.listar:
             await this.listar();
             break;
-
           case OpcoesBuscarEmprestimo.id:
             await this.buscarPorId();
             break;
-
           case OpcoesBuscarEmprestimo.cliente:
             await this.buscarPorCliente();
             break;
-
           case OpcoesBuscarEmprestimo.exemplar:
             await this.buscarPorExemplar();
             break;
-
           case OpcoesBuscarEmprestimo.ativos:
             await this.listarAtivos();
             break;
-
           case OpcoesBuscarEmprestimo.sair:
             continuar = false;
             break;
@@ -166,11 +87,11 @@ export class EmprestimoController {
   private async listar(): Promise<void> {
     const emprestimos = await this.emprestimoService.buscarTodos();
 
-    this.mostrarEmprestimos(emprestimos);
+    this.emprestimoView.mostrarEmprestimos(emprestimos);
   }
 
   private async buscarPorId(): Promise<void> {
-    const id = await this.lerId("ID do empréstimo:");
+    const id = await this.emprestimoView.lerId("ID do empréstimo:");
 
     const emprestimo = await this.emprestimoService.buscarPorId(id);
 
@@ -179,7 +100,7 @@ export class EmprestimoController {
       return;
     }
 
-    this.mostrarEmprestimos([emprestimo]);
+    this.emprestimoView.mostrarEmprestimos([emprestimo]);
   }
 
   private async buscarPorCliente(): Promise<void> {
@@ -190,12 +111,12 @@ export class EmprestimoController {
       return;
     }
 
-    const clienteId = await this.selecionarCliente(clientes);
+    const clienteId = await this.emprestimoView.selecionarCliente(clientes);
 
     const emprestimos =
       await this.emprestimoService.buscarPorCliente(clienteId);
 
-    this.mostrarEmprestimos(emprestimos);
+    this.emprestimoView.mostrarEmprestimos(emprestimos);
   }
 
   private async buscarPorExemplar(): Promise<void> {
@@ -206,18 +127,18 @@ export class EmprestimoController {
       return;
     }
 
-    const exemplarId = await this.selecionarExemplar(exemplares);
+    const exemplarId = await this.emprestimoView.selecionarExemplar(exemplares);
 
     const emprestimos =
       await this.emprestimoService.buscarPorExemplar(exemplarId);
 
-    this.mostrarEmprestimos(emprestimos);
+    this.emprestimoView.mostrarEmprestimos(emprestimos);
   }
 
   private async listarAtivos(): Promise<void> {
     const emprestimos = await this.emprestimoService.buscarAtivos();
 
-    this.mostrarEmprestimos(emprestimos);
+    this.emprestimoView.mostrarEmprestimos(emprestimos);
   }
 
   private async realizar(): Promise<void> {
@@ -237,13 +158,13 @@ export class EmprestimoController {
 
     console.log("\n=== Novo empréstimo ===\n");
 
-    const clienteId = await this.selecionarCliente(clientes);
+    const clienteId = await this.emprestimoView.selecionarCliente(clientes);
 
-    const exemplarId = await this.selecionarExemplar(exemplares);
+    const exemplarId = await this.emprestimoView.selecionarExemplar(exemplares);
 
     const dataEmprestimo = await input({
       message: "Data do empréstimo (AAAA-MM-DD):",
-      default: this.dataAtual(),
+      default: dataAtual(),
     });
 
     const emprestimo = await this.emprestimoService.cadastrar(
@@ -285,7 +206,7 @@ export class EmprestimoController {
 
     const dataDevolucao = await input({
       message: "Data da devolução (AAAA-MM-DD):",
-      default: this.dataAtual(),
+      default: dataAtual(),
     });
 
     const emprestimo = await this.emprestimoService.devolver(
@@ -317,15 +238,14 @@ export class EmprestimoController {
       })),
     });
 
-    const emprestimo =
-      await this.emprestimoService.buscarPorId(emprestimoId);
+    const emprestimo = await this.emprestimoService.buscarPorId(emprestimoId);
 
     if (!emprestimo) {
       console.log("\nEmpréstimo não encontrado.");
       return;
     }
 
-    this.mostrarEmprestimos([emprestimo]);
+    this.emprestimoView.mostrarEmprestimos([emprestimo]);
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o empréstimo #${emprestimo.id}?`,
@@ -346,75 +266,6 @@ export class EmprestimoController {
     }
   }
 
-  private async selecionarCliente(clientes: Cliente[]): Promise<number> {
-    return await select({
-      message: "Selecione o cliente:",
-      choices: clientes.map((cliente) => ({
-        name: `${cliente.nome} — ${cliente.email}`,
-        value: cliente.id,
-      })),
-    });
-  }
-
-  private async selecionarExemplar(exemplares: Exemplar[]): Promise<number> {
-    return await select({
-      message: "Selecione o exemplar:",
-      choices: exemplares.map((exemplar) => ({
-        name: `${exemplar.codigo} — Livro ID ${exemplar.livro_id} — ${exemplar.estado_conservacao}`,
-        value: exemplar.id,
-      })),
-    });
-  }
-
-  private async lerId(message: string): Promise<number> {
-    const resposta = await input({
-      message,
-    });
-
-    const id = Number(resposta);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("O ID deve ser um número inteiro maior que zero.");
-    }
-
-    return id;
-  }
-
-  private mostrarEmprestimos(emprestimos: Emprestimo[]): void {
-    if (emprestimos.length === 0) {
-      console.log("\nNenhum empréstimo encontrado.");
-      return;
-    }
-
-    const tabela = new Table({
-      head: [
-        "ID",
-        "Exemplar",
-        "Cliente",
-        "Data empréstimo",
-        "Data devolução",
-        "Status",
-      ],
-      colWidths: [6, 12, 12, 18, 18, 12],
-      wordWrap: true,
-    });
-
-    for (const emprestimo of emprestimos) {
-      tabela.push([
-        emprestimo.id,
-        emprestimo.exemplar_id,
-        emprestimo.cliente_id,
-        formatData(emprestimo.data_emprestimo),
-        emprestimo.data_devolucao === null
-          ? "-"
-          : formatData(emprestimo.data_devolucao),
-        emprestimo.data_devolucao !== null ? "Devolvido" : "Ativo",
-      ]);
-    }
-
-    console.log("\n" + tabela.toString());
-  }
-
   private descricaoEmprestimo(emprestimo: Emprestimo): string {
     const status = emprestimo.data_devolucao ? "Devolvido" : "Ativo";
 
@@ -425,9 +276,5 @@ export class EmprestimoController {
       `${formatData(emprestimo.data_emprestimo)} — ` +
       status
     );
-  }
-
-  private dataAtual(): string {
-    return new Date().toISOString().slice(0, 10);
   }
 }
