@@ -152,9 +152,10 @@ export class ClienteController {
       telefone.trim() === "" ? null : telefone,
     );
 
-    console.log("\nCliente cadastrado com sucesso!\n");
-
-    this.clienteView.mostrarClientes([cliente]);
+    this.clienteView.mostrarClientes(
+      [cliente],
+      "Cliente cadastrado com sucesso!",
+    );
   }
 
   private async atualizar(): Promise<void> {
@@ -177,8 +178,7 @@ export class ClienteController {
       return;
     }
 
-    console.log("\nCliente selecionado:");
-    this.clienteView.mostrarClientes([cliente]);
+    this.clienteView.mostrarClientes([cliente], "Cliente selecionado:");
 
     const nome = await input({
       message: "Nome:",
@@ -207,9 +207,10 @@ export class ClienteController {
       return;
     }
 
-    console.log("\nCliente atualizado com sucesso!\n");
-
-    this.clienteView.mostrarClientes([clienteAtualizado]);
+    this.clienteView.mostrarClientes(
+      [clienteAtualizado],
+      "Cliente atualizado com sucesso!",
+    );
   }
 
   private async remover(): Promise<void> {
@@ -232,8 +233,7 @@ export class ClienteController {
       return;
     }
 
-    console.log("\nCliente selecionado:");
-    this.clienteView.mostrarClientes([cliente]);
+    this.clienteView.mostrarClientes([cliente], "Cliente selecionado:");
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o cliente "${cliente.nome}"?`,

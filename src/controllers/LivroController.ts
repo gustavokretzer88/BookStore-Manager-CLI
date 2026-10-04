@@ -262,9 +262,7 @@ export class LivroController {
       autorId,
     );
 
-    console.log("\nLivro cadastrado com sucesso!\n");
-
-    this.livroView.mostrarLivros([livro]);
+    this.livroView.mostrarLivros([livro], "Livro cadastrado com sucesso!");
   }
 
   private async atualizar(): Promise<void> {
@@ -351,9 +349,10 @@ export class LivroController {
       return;
     }
 
-    console.log("\nLivro atualizado com sucesso!\n");
-
-    this.livroView.mostrarLivros([livroAtualizado]);
+    this.livroView.mostrarLivros(
+      [livroAtualizado],
+      "Livro atualizado com sucesso!",
+    );
   }
 
   private async remover(): Promise<void> {
@@ -376,8 +375,7 @@ export class LivroController {
       return;
     }
 
-    console.log("\nLivro selecionado:");
-    this.livroView.mostrarLivros([livro]);
+    this.livroView.mostrarLivros([livro], "Livro selecionado:");
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o livro "${livro.titulo}"?`,

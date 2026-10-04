@@ -48,7 +48,7 @@ export class AutorController {
     const selecao = await this.autorView.mostraOpcoesBuscarAutorPor();
 
     switch (selecao) {
-      case OpcoesBuscarAutorPor.listar: {
+      case OpcoesBuscarAutorPor.todos: {
         const autores = await this.autorService.buscarTodos();
         this.autorView.mostrarAutores(autores);
         break;
@@ -123,9 +123,7 @@ export class AutorController {
       anoFalecimento,
     );
 
-    console.log("\nAutor cadastrado com sucesso!\n");
-
-    this.autorView.mostrarAutores([autor]);
+    this.autorView.mostrarAutores([autor], "Autor cadastrado com sucesso!");
   }
 
   private async atualizar(): Promise<void> {
@@ -148,8 +146,7 @@ export class AutorController {
       return;
     }
 
-    console.log("\nAutor selecionado:");
-    this.autorView.mostrarAutores([autor]);
+    this.autorView.mostrarAutores([autor], "Autor selecionado:");
 
     const nome = await input({
       message: "Nome:",
@@ -194,9 +191,10 @@ export class AutorController {
       return;
     }
 
-    console.log("\nAutor atualizado com sucesso!\n");
-
-    this.autorView.mostrarAutores([autorAtualizado]);
+    this.autorView.mostrarAutores(
+      [autorAtualizado],
+      "Autor atualizado com sucesso!",
+    );
   }
 
   private async remover(): Promise<void> {
@@ -219,8 +217,7 @@ export class AutorController {
       return;
     }
 
-    console.log("\nAutor selecionado:");
-    this.autorView.mostrarAutores([autor]);
+    this.autorView.mostrarAutores([autor], "Autor selecionado:");
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o autor "${autor.nome}"?`,

@@ -5,18 +5,15 @@ import { ClienteController } from "./ClienteController";
 import { ExemplarController } from "./ExemplarController";
 import { EmprestimoController } from "./EmprestimoController";
 import { RelatorioController } from "./RelatorioController";
-
-enum OpcoesMenuPrincipal {
-  livros,
-  autores,
-  exemplar,
-  cliente,
-  emprestimo,
-  relatorios,
-  sair,
-}
+import {
+  MenuPrincipalView,
+  OpcoesMenuPrincipal,
+} from "../views/MenuPrincipalView";
 
 export class MenuPrincipal {
+  private readonly menuPrincipalView: MenuPrincipalView =
+    new MenuPrincipalView();
+
   constructor(
     private readonly livroController: LivroController,
     private readonly atorController: AutorController,
@@ -30,7 +27,7 @@ export class MenuPrincipal {
     let continuar = true;
 
     while (continuar) {
-      const opcao = await this.mostrarOpcoes();
+      const opcao = await this.menuPrincipalView.mostrarOpcoes();
 
       switch (opcao) {
         case OpcoesMenuPrincipal.livros:
@@ -56,20 +53,5 @@ export class MenuPrincipal {
         default:
       }
     }
-  }
-
-  private async mostrarOpcoes(): Promise<OpcoesMenuPrincipal> {
-    return await select({
-      message: "BookStore Manager",
-      choices: [
-        { name: "Livros", value: OpcoesMenuPrincipal.livros },
-        { name: "Autores", value: OpcoesMenuPrincipal.autores },
-        { name: "Exemplares", value: OpcoesMenuPrincipal.exemplar },
-        { name: "Clientes", value: OpcoesMenuPrincipal.cliente },
-        { name: "Empréstimos", value: OpcoesMenuPrincipal.emprestimo },
-        { name: "Relatórios", value: OpcoesMenuPrincipal.relatorios },
-        { name: "Sair", value: OpcoesMenuPrincipal.sair },
-      ],
-    });
   }
 }

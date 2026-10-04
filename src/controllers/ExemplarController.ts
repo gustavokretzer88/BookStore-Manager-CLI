@@ -58,7 +58,7 @@ export class ExemplarController {
       case OpcoesBuscarExemplarPor.todos: {
         const exemplares = await this.exemplarService.buscarTodos();
 
-        this.mostrarExemplares(exemplares);
+        this.exemplarView.mostrarExemplares(exemplares);
         break;
       }
 
@@ -75,7 +75,7 @@ export class ExemplarController {
 
         const exemplar = await this.exemplarService.buscarPorId(id);
 
-        this.mostrarExemplares(exemplar ? [exemplar] : []);
+        this.exemplarView.mostrarExemplares(exemplar ? [exemplar] : []);
 
         break;
       }
@@ -87,7 +87,7 @@ export class ExemplarController {
 
         const exemplar = await this.exemplarService.buscarPorCodigo(codigo);
 
-        this.mostrarExemplares(exemplar ? [exemplar] : []);
+        this.exemplarView.mostrarExemplares(exemplar ? [exemplar] : []);
 
         break;
       }
@@ -110,17 +110,17 @@ export class ExemplarController {
 
         const exemplares = await this.exemplarService.buscarPorLivro(livroId);
 
-        this.mostrarExemplares(exemplares);
+        this.exemplarView.mostrarExemplares(exemplares);
 
         break;
       }
 
       case OpcoesBuscarExemplarPor.estado: {
-        const estado = await this.selecionarEstado();
+        const estado = await this.exemplarView.selecionarEstado();
 
         const exemplares = await this.exemplarService.buscarPorEstado(estado);
 
-        this.mostrarExemplares(exemplares);
+        this.exemplarView.mostrarExemplares(exemplares);
 
         break;
       }
@@ -128,7 +128,7 @@ export class ExemplarController {
       case OpcoesBuscarExemplarPor.disponiveis: {
         const exemplares = await this.exemplarService.buscarDisponiveis();
 
-        this.mostrarExemplares(exemplares);
+        this.exemplarView.mostrarExemplares(exemplares);
 
         break;
       }
@@ -161,7 +161,7 @@ export class ExemplarController {
       })),
     });
 
-    const estado = await this.selecionarEstado();
+    const estado = await this.exemplarView.selecionarEstado();
 
     const exemplar = await this.exemplarService.cadastrar(
       codigo,
@@ -171,7 +171,7 @@ export class ExemplarController {
 
     console.log("\nExemplar cadastrado com sucesso!\n");
 
-    this.mostrarExemplares([exemplar]);
+    this.exemplarView.mostrarExemplares([exemplar]);
   }
 
   private async atualizar(): Promise<void> {
@@ -194,8 +194,7 @@ export class ExemplarController {
       return;
     }
 
-    console.log("\nExemplar selecionado:");
-    this.mostrarExemplares([exemplar]);
+    this.exemplarView.mostrarExemplares([exemplar], "Exemplar selecionado:");
 
     const codigo = await input({
       message: "Código:",
@@ -217,7 +216,9 @@ export class ExemplarController {
       default: exemplar.livro_id,
     });
 
-    const estado = await this.selecionarEstado(exemplar.estado_conservacao);
+    const estado = await this.exemplarView.selecionarEstado(
+      exemplar.estado_conservacao,
+    );
 
     const exemplarAtualizado = await this.exemplarService.atualizar(
       id,
@@ -231,9 +232,10 @@ export class ExemplarController {
       return;
     }
 
-    console.log("\nExemplar atualizado com sucesso!\n");
-
-    this.mostrarExemplares([exemplarAtualizado]);
+    this.exemplarView.mostrarExemplares(
+      [exemplarAtualizado],
+      "Exemplar atualizado com sucesso!",
+    );
   }
 
   private async remover(): Promise<void> {
@@ -256,8 +258,7 @@ export class ExemplarController {
       return;
     }
 
-    console.log("\nExemplar selecionado:");
-    this.mostrarExemplares([exemplar]);
+    this.exemplarView.mostrarExemplares([exemplar], "Exemplar selecionado:");
 
     const confirmar = await confirm({
       message: `Deseja realmente remover o exemplar "${exemplar.codigo}"?`,
@@ -277,60 +278,5 @@ export class ExemplarController {
     }
 
     console.log("\nExemplar removido com sucesso!\n");
-  }
-
-  private async selecionarEstado(
-    estadoAtual?: EstadoConservacao,
-  ): Promise<EstadoConservacao> {
-    const selecao = await select({
-      message: "Estado de conservação:",
-      choices: [
-        {
-          name: "Novo",
-          value: "NOVO",
-        },
-        {
-          name: "Bom",
-          value: "BOM",
-        },
-        {
-          name: "Regular",
-          value: "REGULAR",
-        },
-        {
-          name: "Ruim",
-          value: "RUIM",
-        },
-      ],
-    });
-    if (selecao.length !== 0) {
-      return selecao;
-    }
-    if (estadoAtual !== undefined) {
-      return estadoAtual;
-    }
-    throw new Error("Erro ao selecionar estado");
-  }
-
-  private mostrarExemplares(exemplares: Exemplar[]): void {
-    if (exemplares.length === 0) {
-      console.log("\nNenhum exemplar encontrado.\n");
-      return;
-    }
-
-    const tabela = new Table({
-      head: ["ID", "Código", "Livro ID", "Estado"],
-    });
-
-    for (const exemplar of exemplares) {
-      tabela.push([
-        exemplar.id,
-        exemplar.codigo,
-        exemplar.livro_id,
-        exemplar.estado_conservacao,
-      ]);
-    }
-
-    console.log(tabela.toString());
   }
 }

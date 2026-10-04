@@ -11,7 +11,7 @@ export enum OpcoesMenuAutor {
 }
 
 export enum OpcoesBuscarAutorPor {
-  listar,
+  todos,
   id,
   nome,
   sair,
@@ -52,7 +52,7 @@ export class AutorView {
       choices: [
         {
           name: "Listar todos",
-          value: OpcoesBuscarAutorPor.listar,
+          value: OpcoesBuscarAutorPor.todos,
         },
         {
           name: "ID",
@@ -80,12 +80,10 @@ export class AutorView {
     });
   }
 
-  mostrarAutores(autores: Autor[]): void {
-    if (autores.length === 0) {
-      console.log("\nNenhum autor encontrado.\n");
-      return;
+  mostrarAutores(autores: Autor[], mensagem?: string): void {
+    if (mensagem !== undefined && mensagem?.length !== 0) {
+      console.log(mensagem);
     }
-
     const tabela = new Table({
       head: ["ID", "Nome", "Nacionalidade", "Nascimento", "Falecimento"],
     });

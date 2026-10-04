@@ -84,10 +84,9 @@ export class EmprestimoView {
     });
   }
 
-  mostrarEmprestimos(emprestimos: Emprestimo[]): void {
-    if (emprestimos.length === 0) {
-      console.log("\nNenhum empréstimo encontrado.");
-      return;
+  mostrarEmprestimos(emprestimos: Emprestimo[], mensagem?: string): void {
+    if (mensagem !== undefined && mensagem.length !== 0) {
+      console.log(mensagem);
     }
 
     const tabela = new Table({
