@@ -12,32 +12,26 @@ export class ClienteController {
     let continuar = true;
 
     while (continuar) {
-      try {
-        const opcao = await this.clienteView.mostrarOpcoes();
+      switch (await this.clienteView.mostrarOpcoes()) {
+        case OpcoesMenuCliente.buscar:
+          await this.buscar();
+          break;
 
-        switch (opcao) {
-          case OpcoesMenuCliente.buscar:
-            await this.buscar();
-            break;
+        case OpcoesMenuCliente.adicionar:
+          await this.adicionar();
+          break;
 
-          case OpcoesMenuCliente.adicionar:
-            await this.adicionar();
-            break;
+        case OpcoesMenuCliente.atualizar:
+          await this.atualizar();
+          break;
 
-          case OpcoesMenuCliente.atualizar:
-            await this.atualizar();
-            break;
+        case OpcoesMenuCliente.remover:
+          await this.remover();
+          break;
 
-          case OpcoesMenuCliente.remover:
-            await this.remover();
-            break;
-
-          case OpcoesMenuCliente.sair:
-            continuar = false;
-            break;
-        }
-      } catch (erro) {
-        console.error("\nErro:", erro instanceof Error ? erro.message : erro);
+        case OpcoesMenuCliente.sair:
+          continuar = false;
+          break;
       }
     }
   }

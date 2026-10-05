@@ -23,32 +23,26 @@ export class EmprestimoController {
     let continuar = true;
 
     while (continuar) {
-      try {
-        const opcao = await this.emprestimoView.mostrarOpcoes();
+      switch (await this.emprestimoView.mostrarOpcoes()) {
+        case OpcoesMenuEmprestimo.buscar:
+          await this.buscar();
+          break;
 
-        switch (opcao) {
-          case OpcoesMenuEmprestimo.buscar:
-            await this.buscar();
-            break;
+        case OpcoesMenuEmprestimo.realizar:
+          await this.realizar();
+          break;
 
-          case OpcoesMenuEmprestimo.realizar:
-            await this.realizar();
-            break;
+        case OpcoesMenuEmprestimo.devolver:
+          await this.devolver();
+          break;
 
-          case OpcoesMenuEmprestimo.devolver:
-            await this.devolver();
-            break;
+        case OpcoesMenuEmprestimo.remover:
+          await this.remover();
+          break;
 
-          case OpcoesMenuEmprestimo.remover:
-            await this.remover();
-            break;
-
-          case OpcoesMenuEmprestimo.sair:
-            continuar = false;
-            break;
-        }
-      } catch (erro) {
-        console.error("\nErro:", erro instanceof Error ? erro.message : erro);
+        case OpcoesMenuEmprestimo.sair:
+          continuar = false;
+          break;
       }
     }
   }

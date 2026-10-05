@@ -1,6 +1,8 @@
 import { Autor } from "../models/Autor";
 import Table from "cli-table3";
 import { confirm, input, select } from "@inquirer/prompts";
+import { CriarAutorDTO } from "../dtos/autor/CriarAutorDTO";
+import { BaseView } from "./BaseView";
 
 export enum OpcoesMenuAutor {
   buscar,
@@ -17,7 +19,7 @@ export enum OpcoesBuscarAutorPor {
   sair,
 }
 
-export class AutorView {
+export class AutorView extends BaseView {
   async mostrarOpcoes(): Promise<OpcoesMenuAutor> {
     return await select({
       message: "Gerenciador de autores:",
@@ -80,6 +82,92 @@ export class AutorView {
     });
   }
 
+  async solicitaIdAutor(): Promise<number> {
+    const resposta = await input({
+      message: "ID do autor:",
+    });
+
+    const id = Number(resposta);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error("O ID deve ser um número inteiro maior que zero.");
+    }
+
+    return id;
+  }
+
+  async solicitaNomeAutor(): Promise<string> {
+    return await input({
+      message: "Nome do autor:",
+    });
+  }
+
+  async solicitaDadosCriarAutor(): Promise<CriarAutorDTO> {
+    const nome = await input({
+      message: "Nome do autor:",
+    });
+
+    const nacionalidade = await input({
+      message: "Nacionalidade (opcional):",
+    });
+
+    const anoNascimentoResposta = await input({
+      message: "Ano de nascimento (opcional):",
+    });
+
+    const anoNascimento = this.verificaEntradaAno(anoNascimentoResposta);
+
+    const anoFalecimentoResposta = await input({
+      message: "Ano de falecimento (opcional):",
+    });
+
+    const anoFalecimento = this.verificaEntradaAno(anoNascimentoResposta);
+
+    const dados: CriarAutorDTO = {
+      nome: nome,
+      nacionalidade: nacionalidade,
+      ano_nascimento: anoNascimento,
+      ano_falecimento: anoFalecimento,
+    };
+    return dados;
+  }
+
+  async solicitaDadosAtualizarAutor(autor: Autor): Promise<Autor> {
+    const nome = await input({
+      message: "Nome:",
+      default: autor.nome,
+    });
+
+    const nacionalidade = await input({
+      message: "Nacionalidade:",
+      default: autor.nacionalidade ?? "",
+    });
+
+    const anoNascimentoResposta = await input({
+      message: "Ano de nascimento:",
+      default: autor.ano_nascimento?.toString() ?? "",
+    });
+
+    const anoNascimento = this.verificaEntradaAno(anoNascimentoResposta);
+
+    const anoFalecimentoResposta = await input({
+      message: "Ano de falecimento:",
+      default: autor.ano_falecimento?.toString() ?? "",
+    });
+
+    const anoFalecimento = this.verificaEntradaAno(anoNascimentoResposta);
+
+    const dados: Autor = {
+      id: autor.id,
+      nome: nome,
+      nacionalidade: nacionalidade,
+      ano_nascimento: anoNascimento,
+      ano_falecimento: anoFalecimento,
+    };
+
+    return dados;
+  }
+
   mostrarAutores(autores: Autor[], mensagem?: string): void {
     if (mensagem !== undefined && mensagem?.length !== 0) {
       console.log(mensagem);
@@ -99,5 +187,19 @@ export class AutorView {
     }
 
     console.log(tabela.toString());
+  }
+
+  private verificaEntradaAno(valor: string): number | null {
+    if (valor.trim() === "") {
+      return null;
+    }
+
+    const ano = Number(valor);
+
+    if (!Number.isInteger(ano) || ano <= 0) {
+      throw new Error(`O ano de deve ser um número inteiro maior que zero.`);
+    }
+
+    return ano;
   }
 }

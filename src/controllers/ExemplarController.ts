@@ -20,35 +20,29 @@ export class ExemplarController {
   async executar(): Promise<void> {
     let continuar = true;
 
-    while (continuar) {
-      try {
-        const opcao = await this.exemplarView.mostrarOpcoes();
+    do {
+      switch (await this.exemplarView.mostrarOpcoes()) {
+        case OpcoesMenuExemplar.buscar:
+          await this.buscar();
+          break;
 
-        switch (opcao) {
-          case OpcoesMenuExemplar.buscar:
-            await this.buscar();
-            break;
+        case OpcoesMenuExemplar.adicionar:
+          await this.adicionar();
+          break;
 
-          case OpcoesMenuExemplar.adicionar:
-            await this.adicionar();
-            break;
+        case OpcoesMenuExemplar.atualizar:
+          await this.atualizar();
+          break;
 
-          case OpcoesMenuExemplar.atualizar:
-            await this.atualizar();
-            break;
+        case OpcoesMenuExemplar.remover:
+          await this.remover();
+          break;
 
-          case OpcoesMenuExemplar.remover:
-            await this.remover();
-            break;
-
-          case OpcoesMenuExemplar.sair:
-            continuar = false;
-            break;
-        }
-      } catch (erro) {
-        console.error("\nErro:", erro instanceof Error ? erro.message : erro);
+        case OpcoesMenuExemplar.sair:
+          continuar = false;
+          break;
       }
-    }
+    } while (continuar);
   }
 
   private async buscar(): Promise<void> {

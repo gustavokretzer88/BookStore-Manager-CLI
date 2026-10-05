@@ -1,3 +1,4 @@
+import { CriarAutorDTO } from "../dtos/autor/CriarAutorDTO";
 import { Autor } from "../models/Autor";
 import { AutorRepository } from "../repositories/AutorRepository";
 
@@ -39,50 +40,34 @@ export class AutorService {
     return this.autorRepository.buscarPorNome(nome.trim());
   }
 
-  async cadastrar(
-    nome: string,
-    nacionalidade: string | null,
-    anoNascimento: number | null,
-    anoFalecimento: number | null,
-  ): Promise<Autor> {
-    if (!nome.trim()) {
+  async cadastrar(dadosCriarAutor: CriarAutorDTO): Promise<Autor> {
+    if (!dadosCriarAutor.nome.trim()) {
       throw new Error("O nome do autor é obrigatório.");
     }
 
-    this.coerenciaAnoNascimementoFalecimento(anoNascimento, anoFalecimento);
-
-    return this.autorRepository.criar(
-      nome.trim(),
-      nacionalidade?.trim() || null,
-      anoNascimento,
-      anoFalecimento,
+    this.coerenciaAnoNascimementoFalecimento(
+      dadosCriarAutor.ano_nascimento,
+      dadosCriarAutor.ano_falecimento,
     );
+
+    return this.autorRepository.criar(dadosCriarAutor);
   }
 
-  async atualizar(
-    id: number,
-    nome: string,
-    nacionalidade: string | null,
-    anoNascimento: number | null,
-    anoFalecimento: number | null,
-  ): Promise<Autor | null> {
-    if (id <= 0) {
+  async atualizar(autor: Autor): Promise<Autor | null> {
+    if (autor.id <= 0) {
       throw new Error("O ID do autor deve ser maior que zero.");
     }
 
-    if (!nome.trim()) {
+    if (!autor.nome.trim()) {
       throw new Error("O nome do autor é obrigatório.");
     }
 
-    this.coerenciaAnoNascimementoFalecimento(anoNascimento, anoFalecimento);
-
-    return this.autorRepository.atualizar(
-      id,
-      nome.trim(),
-      nacionalidade?.trim() || null,
-      anoNascimento,
-      anoFalecimento,
+    this.coerenciaAnoNascimementoFalecimento(
+      autor.ano_nascimento,
+      autor.ano_falecimento,
     );
+
+    return this.autorRepository.atualizar(autor);
   }
 
   async excluir(id: number): Promise<boolean> {

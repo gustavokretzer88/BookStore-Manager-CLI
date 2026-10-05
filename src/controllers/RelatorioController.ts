@@ -18,9 +18,7 @@ export class RelatorioController {
     let continuar = true;
 
     while (continuar) {
-      const opcao = await this.relatorioView.mostrarOpcoes();
-
-      switch (opcao) {
+      switch (await this.relatorioView.mostrarOpcoes()) {
         case OpcoesMenuRelatorio.numLivrosPorAutor:
           await this.livrosPorAutor();
           break;

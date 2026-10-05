@@ -1,4 +1,5 @@
 import { pool } from "../database/connection";
+import { CriarAutorDTO } from "../dtos/autor/CriarAutorDTO";
 import { Autor } from "../models/Autor";
 
 export class AutorRepository {
@@ -54,12 +55,7 @@ export class AutorRepository {
     return result.rows;
   }
 
-  async criar(
-    nome: string,
-    nacionalidade: string | null,
-    anoNascimento: number | null,
-    anoFalecimento: number | null,
-  ): Promise<Autor> {
+  async criar(dadosCriarAutor: CriarAutorDTO): Promise<Autor> {
     const result = await pool.query<Autor>(
       `
             INSERT INTO autores (
@@ -76,7 +72,12 @@ export class AutorRepository {
                 ano_nascimento,
                 ano_falecimento
             `,
-      [nome, nacionalidade, anoNascimento, anoFalecimento],
+      [
+        dadosCriarAutor.nome,
+        dadosCriarAutor.nacionalidade,
+        dadosCriarAutor.ano_nascimento,
+        dadosCriarAutor.ano_falecimento,
+      ],
     );
 
     const autor = result.rows[0];
@@ -88,13 +89,7 @@ export class AutorRepository {
     return autor;
   }
 
-  async atualizar(
-    id: number,
-    nome: string,
-    nacionalidade: string | null,
-    anoNascimento: number | null,
-    anoFalecimento: number | null,
-  ): Promise<Autor | null> {
+  async atualizar(autor: Autor): Promise<Autor | null> {
     const result = await pool.query<Autor>(
       `
             UPDATE autores
@@ -111,7 +106,13 @@ export class AutorRepository {
                 ano_nascimento,
                 ano_falecimento
             `,
-      [nome, nacionalidade, anoNascimento, anoFalecimento, id],
+      [
+        autor.nome,
+        autor.nacionalidade,
+        autor.ano_nascimento,
+        autor.ano_falecimento,
+        autor.id,
+      ],
     );
 
     return result.rows[0] ?? null;

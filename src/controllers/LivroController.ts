@@ -1,8 +1,5 @@
-import Table from "cli-table3";
 import { confirm, input, select } from "@inquirer/prompts";
 
-import { Livro } from "../models/Livro";
-import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
 import { LivroService } from "../services/LivroService";
 import { AutorService } from "../services/AutorService";
 import { LivroView } from "../views/LivroView";
@@ -37,32 +34,28 @@ export class LivroController {
     let continuar = true;
 
     while (continuar) {
-      try {
-        const opcao = await this.mostrarOpcoes();
+      const opcao = await this.mostrarOpcoes();
 
-        switch (opcao) {
-          case OpcoesMenuLivros.buscar:
-            await this.buscar();
-            break;
+      switch (opcao) {
+        case OpcoesMenuLivros.buscar:
+          await this.buscar();
+          break;
 
-          case OpcoesMenuLivros.adicionar:
-            await this.adicionar();
-            break;
+        case OpcoesMenuLivros.adicionar:
+          await this.adicionar();
+          break;
 
-          case OpcoesMenuLivros.atualizar:
-            await this.atualizar();
-            break;
+        case OpcoesMenuLivros.atualizar:
+          await this.atualizar();
+          break;
 
-          case OpcoesMenuLivros.remover:
-            await this.remover();
-            break;
+        case OpcoesMenuLivros.remover:
+          await this.remover();
+          break;
 
-          case OpcoesMenuLivros.sair:
-            continuar = false;
-            break;
-        }
-      } catch (erro) {
-        console.error(erro);
+        case OpcoesMenuLivros.sair:
+          continuar = false;
+          break;
       }
     }
   }

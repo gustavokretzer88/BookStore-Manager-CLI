@@ -9,10 +9,12 @@ import {
   MenuPrincipalView,
   OpcoesMenuPrincipal,
 } from "../views/MenuPrincipalView";
+import { Input } from "../cli/Input";
 
 export class MenuPrincipal {
   private readonly menuPrincipalView: MenuPrincipalView =
     new MenuPrincipalView();
+  private readonly in: Input = new Input();
 
   constructor(
     private readonly livroController: LivroController,
@@ -27,30 +29,32 @@ export class MenuPrincipal {
     let continuar = true;
 
     while (continuar) {
-      const opcao = await this.menuPrincipalView.mostrarOpcoes();
-
-      switch (opcao) {
-        case OpcoesMenuPrincipal.livros:
-          await this.livroController.executar();
-          break;
-        case OpcoesMenuPrincipal.autores:
-          await this.atorController.executar();
-          break;
-        case OpcoesMenuPrincipal.cliente:
-          await this.clienteController.executar();
-          break;
-        case OpcoesMenuPrincipal.exemplar:
-          await this.exemplarView.executar();
-          break;
-        case OpcoesMenuPrincipal.emprestimo:
-          await this.emprestimoController.executar();
-          break;
-        case OpcoesMenuPrincipal.relatorios:
-          await this.relatoriosController.executar();
-        case OpcoesMenuPrincipal.sair:
-          continuar = false;
-          break;
-        default:
+      try {
+        switch (await this.menuPrincipalView.mostrarOpcoes()) {
+          case OpcoesMenuPrincipal.livros:
+            await this.livroController.executar();
+            break;
+          case OpcoesMenuPrincipal.autores:
+            await this.atorController.executar();
+            break;
+          case OpcoesMenuPrincipal.cliente:
+            await this.clienteController.executar();
+            break;
+          case OpcoesMenuPrincipal.exemplar:
+            await this.exemplarView.executar();
+            break;
+          case OpcoesMenuPrincipal.emprestimo:
+            await this.emprestimoController.executar();
+            break;
+          case OpcoesMenuPrincipal.relatorios:
+            await this.relatoriosController.executar();
+          case OpcoesMenuPrincipal.sair:
+            continuar = false;
+            break;
+          default:
+        }
+      } catch (erro) {
+        console.error("\nErro:", erro instanceof Error ? erro.message : erro);
       }
     }
   }
