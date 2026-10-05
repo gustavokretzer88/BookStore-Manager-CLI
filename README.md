@@ -1170,6 +1170,21 @@ A versão `develop` reúne as principais camadas necessárias para uma aplicaç�
 
 # 📦 Versão
 
+## v0.2 
+
+- módulo completo de Relatórios;
+- RelatorioController, RelatorioService, RelatorioRepository e RelatorioView;
+- cinco relatórios;
+- novos DTOs, inclusive os específicos de relatório;
+- BaseView para reutilização da camada de apresentação;
+- reorganização de MenuPrincipal/MenuPrincipalView;
+- View SQL vw_livrosEAutor;
+- melhorias nas consultas SQL;
+- typecheck, ESLint e npm run check;
+- atualização da estrutura arquitetural e do fluxo de dependências;
+
+**Data da versão:** 05/10/2026
+
 ## v0.1 — Primeira versão
 
 A versão **v0.1** representa a primeira versão funcional do **BookStore Manager CLI**.
