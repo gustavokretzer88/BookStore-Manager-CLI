@@ -78,8 +78,7 @@ async function main(): Promise<void> {
   );
 
   const relatorioController = new RelatorioController(
-    relatorioService,
-    autorService,
+    relatorioService
   );
 
   // // ========================================

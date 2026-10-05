@@ -91,7 +91,7 @@ export class LivroView extends BaseView {
 
   async solicitaDadosCriarLivro(autores: Autor[]): Promise<CriarLivroDTO> {
     const titulo = await this.perguntar("Título do livro:");
-    const isbn = await this.perguntar("ISBN (opcional):");
+    const isbn = await this.perguntar("ISBN:");
     const anoPublicacao = await this.perguntarNumero("Ano de publicação:");
     const numeroChamada = await this.perguntar("Número de chamada:");
 
@@ -169,9 +169,14 @@ export class LivroView extends BaseView {
   }
 
   mostrarLivros(livros: Livro[] | LivroComAutorDTO[], mensagem?: string): void {
-    if (mensagem !== undefined && mensagem.length !== 0) {
-      console.log(mensagem);
+    if (mensagem !== undefined && mensagem.length !== 0) 
+      this.mensagem(mensagem)    
+
+    if(livros.length === 0) {
+      this.mensagemErro("Livro não encontrado.");
+      return;
     }
+      
 
     const labelColunaAutor =
       "autor_id" in livros[0]! ? "AutorID" : "Nome do autor";

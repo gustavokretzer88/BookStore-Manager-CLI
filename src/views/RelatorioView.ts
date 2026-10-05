@@ -9,7 +9,6 @@ export enum OpcoesMenuRelatorio {
   numEmprestimoPorLivro,
   livrosDisponiveis,
   livrosComEmprestimos,
-  livrosPorAutor,
   clientesComEmprestimoAtivo,
   sair,
 }
@@ -34,10 +33,6 @@ export class RelatorioView {
         {
           name: "Livros com empréstimos ativo.",
           value: OpcoesMenuRelatorio.livrosComEmprestimos,
-        },
-        {
-          name: "Livros cadastrados por autor.",
-          value: OpcoesMenuRelatorio.livrosPorAutor,
         },
         {
           name: "Clientes com empréstimos.",

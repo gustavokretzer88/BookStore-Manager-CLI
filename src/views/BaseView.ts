@@ -2,11 +2,11 @@ import { confirm, input } from "@inquirer/prompts";
 
 export class BaseView {
   mensagemSucesso(mensagem: string): void {
-    console.log(`\n✓ ${mensagem}`);
+    console.log(`\n✓ ${mensagem}\n`);
   }
 
   mensagemErro(mensagem: string): void {
-    console.error(`\n✗ ${mensagem}`);
+    console.error(`\n✗ ${mensagem}\n`);
   }
 
   mensagem(mensagem: string): void {
