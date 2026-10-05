@@ -9,12 +9,10 @@ import {
   MenuPrincipalView,
   OpcoesMenuPrincipal,
 } from "../views/MenuPrincipalView";
-import { Input } from "../cli/Input";
 
 export class MenuPrincipal {
   private readonly menuPrincipalView: MenuPrincipalView =
     new MenuPrincipalView();
-  private readonly in: Input = new Input();
 
   constructor(
     private readonly livroController: LivroController,

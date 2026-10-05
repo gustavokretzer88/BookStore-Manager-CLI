@@ -129,5 +129,6 @@ export class AutorController {
     if (!removido) {
       throw new Error("Autor não encontrado.");
     }
+    this.autorView.mensagemSucesso("Autor excluido com sucesso!");
   }
 }

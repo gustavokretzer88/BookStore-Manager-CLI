@@ -2,6 +2,7 @@ import { Livro } from "../models/Livro";
 import { LivroRepository } from "../repositories/LivroRepository";
 import { AutorRepository } from "../repositories/AutorRepository";
 import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
+import { CriarLivroDTO } from "../dtos/livro/CriarLivroDTO";
 
 export class LivroService {
   constructor(
@@ -120,25 +121,14 @@ export class LivroService {
     return livros;
   }
 
-  async cadastrar(
-    titulo: string,
-    isbn: string,
-    numeroChamada: string,
-    anoPublicacao: number,
-    autorId: number,
-  ): Promise<Livro> {
-    this.validarTitulo(titulo);
-    this.validarIsbn(isbn);
-    this.validarAnoPublicacao(anoPublicacao);
-    this.validarId(autorId);
-
-    const autor = await this.autorRepository.buscarPorId(autorId);
-
+  async cadastrar(dadosLivro: CriarLivroDTO): Promise<Livro> {
+    this.validarLivro(dadosLivro);
+    const autor = await this.autorRepository.buscarPorId(dadosLivro.autor_id);
     if (!autor) {
-      throw new Error(`Autor com ID ${autorId} não encontrado.`);
+      throw new Error(`Autor com ID ${dadosLivro.autor_id} não encontrado.`);
     }
 
-    const isbnNormalizado = isbn.trim();
+    const isbnNormalizado = dadosLivro.isbn.trim();
 
     if (isbnNormalizado) {
       const livroExistente =
@@ -151,53 +141,29 @@ export class LivroService {
       }
     }
 
-    return this.livroRepository.criar(
-      titulo.trim(),
-      isbnNormalizado,
-      anoPublicacao,
-      numeroChamada.trim(),
-      autorId,
-    );
+    return this.livroRepository.criar(dadosLivro);
   }
 
-  async atualizar(
-    id: number,
-    titulo: string,
-    isbn: string,
-    anoPublicacao: number,
-    numeroChamada: string,
-    autorId: number,
-  ): Promise<Livro | null> {
-    this.validarId(id);
-    this.validarTitulo(titulo);
-    this.validarAutorId(autorId);
-    this.validarAnoPublicacao(anoPublicacao);
+  async atualizar(livro: Livro): Promise<Livro | null> {
+    this.validarLivro(livro);
 
-    const autor = await this.autorRepository.buscarPorId(autorId);
-
+    const autor = await this.autorRepository.buscarPorId(livro.autor_id);
     if (!autor) {
-      throw new Error(`Autor com ID ${autorId} não encontrado.`);
+      throw new Error(`Autor com ID ${livro.autor_id} não encontrado.`);
     }
 
-    const isbnNormalizado = isbn.trim();
+    const isbnNormalizado = livro.isbn.trim();
 
     const livroComMesmoIsbn =
       await this.livroRepository.buscarPorIsbn(isbnNormalizado);
 
-    if (livroComMesmoIsbn && livroComMesmoIsbn.id !== id) {
+    if (livroComMesmoIsbn && livroComMesmoIsbn.id !== livro.id) {
       throw new Error(
         `Já existe outro livro cadastrado com o ISBN ${isbnNormalizado}.`,
       );
     }
 
-    return this.livroRepository.atualizar(
-      id,
-      titulo.trim(),
-      isbnNormalizado,
-      anoPublicacao,
-      numeroChamada.trim(),
-      autorId,
-    );
+    return this.livroRepository.atualizar(livro);
   }
 
   async excluir(id: number): Promise<boolean> {
@@ -241,5 +207,15 @@ export class LivroService {
     if (!nomeAutor.trim()) {
       throw new Error("Deve ser informado o nome do autor.");
     }
+  }
+  private validarLivro(dadosLivro: CriarLivroDTO | Livro) {
+    if ("id" in dadosLivro) {
+      this.validarId(dadosLivro.id);
+    }
+    this.validarTitulo(dadosLivro.titulo);
+    this.validarIsbn(dadosLivro.isbn);
+    this.validarAnoPublicacao(dadosLivro.ano_publicacao);
+    this.validarChamada(dadosLivro.numero_chamada);
+    this.validarAutorId(dadosLivro.autor_id);
   }
 }

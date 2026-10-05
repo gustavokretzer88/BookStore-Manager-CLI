@@ -1,4 +1,5 @@
 import { pool } from "../database/connection";
+import { CriarLivroDTO } from "../dtos/livro/CriarLivroDTO";
 import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
 import { Livro } from "../models/Livro";
 
@@ -291,13 +292,7 @@ export class LivroRepository {
     return result.rows;
   }
 
-  async criar(
-    titulo: string,
-    isbn: string | null,
-    anoPublicacao: number | null,
-    numeroChamada: string | null,
-    autorId: number,
-  ): Promise<Livro> {
+  async criar(dadosLivro: CriarLivroDTO): Promise<Livro> {
     const result = await pool.query<Livro>(
       `
             INSERT INTO livros (
@@ -316,7 +311,13 @@ export class LivroRepository {
                 numero_chamada,
                 autor_id
             `,
-      [titulo, isbn, anoPublicacao, numeroChamada, autorId],
+      [
+        dadosLivro.titulo,
+        dadosLivro.isbn,
+        dadosLivro.ano_publicacao,
+        dadosLivro.numero_chamada,
+        dadosLivro.autor_id,
+      ],
     );
     const livro = result.rows[0];
     if (!livro) {
@@ -325,14 +326,7 @@ export class LivroRepository {
     return livro;
   }
 
-  async atualizar(
-    id: number,
-    titulo: string,
-    isbn: string | null,
-    anoPublicacao: number | null,
-    numeroChamada: string | null,
-    autorId: number,
-  ): Promise<Livro | null> {
+  async atualizar(livro: Livro): Promise<Livro | null> {
     const result = await pool.query<Livro>(
       `
             UPDATE livros
@@ -351,7 +345,14 @@ export class LivroRepository {
                 numero_chamada,
                 autor_id
             `,
-      [titulo, isbn, anoPublicacao, numeroChamada, autorId, id],
+      [
+        livro.titulo,
+        livro.isbn,
+        livro.ano_publicacao,
+        livro.numero_chamada,
+        livro.autor_id,
+        livro.id,
+      ],
     );
 
     return result.rows[0] ?? null;

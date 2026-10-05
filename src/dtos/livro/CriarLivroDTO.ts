@@ -1,5 +1,4 @@
-export interface Livro {
-  id: number;
+export interface CriarLivroDTO {
   titulo: string;
   isbn: string;
   ano_publicacao: number;

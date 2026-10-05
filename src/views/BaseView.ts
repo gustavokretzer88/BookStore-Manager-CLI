@@ -1,13 +1,6 @@
-import { confirm } from "@inquirer/prompts";
-import readline from "node:readline/promises";
-import { stdin as input, stdout as output } from "node:process";
+import { confirm, input } from "@inquirer/prompts";
 
 export class BaseView {
-  private readonly rl = readline.createInterface({
-    input,
-    output,
-  });
-
   mensagemSucesso(mensagem: string): void {
     console.log(`\n✓ ${mensagem}`);
   }
@@ -27,7 +20,7 @@ export class BaseView {
     });
   }
   async perguntar(mensagem: string): Promise<string> {
-    return (await this.rl.question(mensagem)).trim();
+    return await input({ message: mensagem });
   }
 
   async perguntarNumero(mensagem: string): Promise<number> {
@@ -41,7 +34,7 @@ export class BaseView {
     return numero;
   }
 
-  fechar(): void {
-    this.rl.close();
-  }
+  // fechar(): void {
+  //   this.rl.close();
+  // }
 }

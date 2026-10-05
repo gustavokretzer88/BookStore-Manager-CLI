@@ -2,25 +2,11 @@ import { confirm, input, select } from "@inquirer/prompts";
 
 import { LivroService } from "../services/LivroService";
 import { AutorService } from "../services/AutorService";
-import { LivroView } from "../views/LivroView";
-
-enum OpcoesMenuLivros {
-  buscar,
-  adicionar,
-  atualizar,
-  remover,
-  sair,
-}
-
-enum ModoBusca {
-  listar,
-  titulo,
-  id,
-  isbn,
-  nomeAutor,
-  numeroChamada,
-  sair,
-}
+import {
+  LivroView,
+  OpcoesBuscarPor,
+  OpcoesMenuLivros,
+} from "../views/LivroView";
 
 export class LivroController {
   private readonly livroView: LivroView = new LivroView();
@@ -34,7 +20,7 @@ export class LivroController {
     let continuar = true;
 
     while (continuar) {
-      const opcao = await this.mostrarOpcoes();
+      const opcao = await this.livroView.mostrarOpcoes();
 
       switch (opcao) {
         case OpcoesMenuLivros.buscar:
@@ -60,286 +46,113 @@ export class LivroController {
     }
   }
 
-  private async mostrarOpcoes(): Promise<OpcoesMenuLivros> {
-    return await select({
-      message: "Gerenciador de livros:",
-      choices: [
-        {
-          name: "Buscar",
-          value: OpcoesMenuLivros.buscar,
-        },
-        {
-          name: "Adicionar",
-          value: OpcoesMenuLivros.adicionar,
-        },
-        {
-          name: "Atualizar",
-          value: OpcoesMenuLivros.atualizar,
-        },
-        {
-          name: "Remover",
-          value: OpcoesMenuLivros.remover,
-        },
-        {
-          name: "Sair",
-          value: OpcoesMenuLivros.sair,
-        },
-      ],
-    });
-  }
-
   private async buscar(): Promise<void> {
-    const selecao = await select({
-      message: "Buscar livro por:",
-      choices: [
-        {
-          name: "Listar todos",
-          value: ModoBusca.listar,
-        },
-        {
-          name: "Título",
-          value: ModoBusca.titulo,
-        },
-        {
-          name: "ID",
-          value: ModoBusca.id,
-        },
-        {
-          name: "ISBN",
-          value: ModoBusca.isbn,
-        },
-        {
-          name: "Nome do autor",
-          value: ModoBusca.nomeAutor,
-        },
-        {
-          name: "Número de chamada",
-          value: ModoBusca.numeroChamada,
-        },
-        {
-          name: "Sair",
-          value: ModoBusca.sair,
-        },
-      ],
-    });
+    const selecao = await this.livroView.mostrarOpcoesBuscarPor();
 
     switch (selecao) {
-      case ModoBusca.listar:
-        this.livroView.mostrarLivros(
-          await this.livroService.buscarTodosComAutor(),
-        );
+      case OpcoesBuscarPor.todos:
+        await this.buscarPorTodos();
         break;
-
-      case ModoBusca.titulo: {
-        const titulo = await input({
-          message: "Título do livro:",
-        });
-
-        this.livroView.mostrarLivros(
-          await this.livroService.buscarPorTituloComAutor(titulo),
-        );
+      case OpcoesBuscarPor.titulo:
+        await this.buscarPorTitulo();
         break;
-      }
-
-      case ModoBusca.id: {
-        const resposta = await input({
-          message: "ID do livro:",
-        });
-
-        const id = Number(resposta);
-
-        if (!Number.isInteger(id) || id <= 0) {
-          throw new Error("O ID deve ser um número inteiro maior que zero.");
-        }
-
-        const livro = await this.livroService.buscarPorIdComAutor(id);
-
-        this.livroView.mostrarLivros(livro ? [livro] : []);
-
+      case OpcoesBuscarPor.id:
+        await this.buscarPorId();
         break;
-      }
-
-      case ModoBusca.isbn: {
-        const isbn = await input({
-          message: "ISBN do livro:",
-        });
-
-        const livro = await this.livroService.buscarPorIsbnComAutor(isbn);
-
-        this.livroView.mostrarLivros(livro ? [livro] : []);
-
+      case OpcoesBuscarPor.isbn:
+        await this.buscarPorIsbn();
         break;
-      }
-
-      case ModoBusca.nomeAutor: {
-        const nomeAutor = await input({
-          message: "Nome do autor:",
-        });
-
-        this.livroView.mostrarLivros(
-          await this.livroService.buscarPorNomeAutorComAutor(nomeAutor),
-        );
-
+      case OpcoesBuscarPor.nomeAutor:
+        await this.buscarPorNomeAutor();
         break;
-      }
-
-      case ModoBusca.numeroChamada: {
-        const numeroChamada = await input({
-          message: "Número de chamada:",
-        });
-
-        this.livroView.mostrarLivros(
-          await this.livroService.buscarPorNumeroChamadaComAutor(numeroChamada),
-        );
-
+      case OpcoesBuscarPor.numeroChamada:
+        await this.buscarPorNumeroChamada();
         break;
-      }
-
-      case ModoBusca.sair:
+      case OpcoesBuscarPor.sair:
         break;
     }
   }
 
+  async buscarPorTodos() {
+    this.livroView.mostrarLivros(await this.livroService.buscarTodosComAutor());
+  }
+
+  async buscarPorId() {
+    const id = await this.livroView.perguntarNumero("Id do livro:");
+    const livro = await this.livroService.buscarPorIdComAutor(id);
+
+    this.livroView.mostrarLivros(livro ? [livro] : []);
+  }
+
+  async buscarPorTitulo() {
+    const titulo = await this.livroView.perguntar("Título do livro:");
+
+    this.livroView.mostrarLivros(
+      await this.livroService.buscarPorTituloComAutor(titulo),
+    );
+  }
+
+  async buscarPorIsbn() {
+    const isbn = await this.livroView.perguntar("ISBN do livro:");
+    const livro = await this.livroService.buscarPorIsbnComAutor(isbn);
+    this.livroView.mostrarLivros(livro ? [livro] : []);
+  }
+
+  async buscarPorNomeAutor() {
+    const nomeAutor = await this.livroView.perguntar("Nome do autor:");
+    this.livroView.mostrarLivros(
+      await this.livroService.buscarPorNomeAutorComAutor(nomeAutor),
+    );
+  }
+
+  async buscarPorNumeroChamada() {
+    const numeroChamada = await this.livroView.perguntar("Número de chamada:");
+    this.livroView.mostrarLivros(
+      await this.livroService.buscarPorNumeroChamadaComAutor(numeroChamada),
+    );
+  }
+
   private async adicionar(): Promise<void> {
-    console.log("\n=== Adicionar livro ===\n");
-
-    const titulo = await input({
-      message: "Título do livro:",
-    });
-
-    const isbn = await input({
-      message: "ISBN (opcional):",
-    });
-
-    const anoResposta = await input({
-      message: "Ano de publicação:",
-    });
-
-    const numeroChamada = await input({
-      message: "Número de chamada:",
-    });
-
-    // Buscar autores cadastrados
     const autores = await this.autorService.buscarTodos();
-
     if (autores.length === 0) {
       throw new Error(
         "Não é possível cadastrar o livro porque não existem autores cadastrados.",
       );
     }
+    const dadosLivro = await this.livroView.solicitaDadosCriarLivro(autores);
 
-    const autorId = await select({
-      message: "Selecione o autor:",
-      choices: autores.map((autor) => ({
-        name: autor.nome,
-        value: autor.id,
-      })),
-    });
-
-    const anoPublicacao = Number(anoResposta);
-
-    if (
-      anoPublicacao !== null &&
-      (!Number.isInteger(anoPublicacao) || anoPublicacao <= 0)
-    ) {
-      throw new Error(
-        "O ano de publicação deve ser um número inteiro maior que zero.",
-      );
-    }
-
-    const livro = await this.livroService.cadastrar(
-      titulo,
-      isbn.trim(),
-      numeroChamada,
-      anoPublicacao,
-      autorId,
-    );
+    const livro = await this.livroService.cadastrar(dadosLivro);
 
     this.livroView.mostrarLivros([livro], "Livro cadastrado com sucesso!");
   }
 
   private async atualizar(): Promise<void> {
-    console.log("\n=== Atualizar livro ===\n");
-
-    const respostaId = await input({
-      message: "ID do livro que deseja atualizar:",
-    });
-
-    const id = Number(respostaId);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("O ID deve ser um número inteiro maior que zero.");
-    }
-
-    const livro = await this.livroService.buscarPorId(id);
-
-    if (!livro) {
-      console.log("\nLivro não encontrado.\n");
-      return;
-    }
-
-    console.log(`\nLivro selecionado: ${livro.titulo}\n`);
-
-    const titulo = await input({
-      message: "Título:",
-      default: livro.titulo,
-    });
-
-    const isbn = await input({
-      message: "ISBN:",
-      default: livro.isbn ?? "",
-    });
-
-    const anoResposta = await input({
-      message: "Ano de publicação:",
-      default: livro.ano_publicacao?.toString() ?? "",
-    });
-
-    const numeroChamada = await input({
-      message: "Número de chamada:",
-      default: livro.numero_chamada ?? "",
-    });
-
     const autores = await this.autorService.buscarTodos();
-
     if (autores.length === 0) {
       throw new Error(
         "Não é possível atualizar o livro porque não existem autores cadastrados.",
       );
     }
+    const id = await this.livroView.perguntarNumero(
+      "ID do livro que deseja atualizar:",
+    );
+    const livro = await this.livroService.buscarPorId(id);
 
-    const autorId = await select({
-      message: "Selecione o autor:",
-      choices: autores.map((autor) => ({
-        name: autor.nome,
-        value: autor.id,
-      })),
-      default: livro.autor_id,
-    });
-
-    const anoPublicacao = Number(anoResposta);
-
-    if (
-      anoPublicacao !== null &&
-      (!Number.isInteger(anoPublicacao) || anoPublicacao <= 0)
-    ) {
-      throw new Error(
-        "O ano de publicação deve ser um número inteiro maior que zero.",
-      );
+    if (!livro) {
+      throw new Error("Livro não encontrado.");
     }
 
+    this.livroView.mensagemSucesso(`Livro selecionado: ${livro.titulo}`);
+
+    const dadosLivrosAtualizado =
+      await this.livroView.solicitaDadosAtualizarLivro(livro, autores);
+
     const livroAtualizado = await this.livroService.atualizar(
-      id,
-      titulo,
-      isbn,
-      anoPublicacao,
-      numeroChamada,
-      autorId,
+      dadosLivrosAtualizado,
     );
 
     if (!livroAtualizado) {
-      console.log("\nLivro não encontrado.\n");
-      return;
+      throw new Error("Erro ao atualizar livro.");
     }
 
     this.livroView.mostrarLivros(
@@ -349,44 +162,29 @@ export class LivroController {
   }
 
   private async remover(): Promise<void> {
-    console.log("\n=== Remover livro ===\n");
-
-    const respostaId = await input({
-      message: "ID do livro que deseja remover:",
-    });
-
-    const id = Number(respostaId);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("O ID deve ser um número inteiro maior que zero.");
-    }
-
+    const id = await this.livroView.perguntarNumero(
+      "ID do livro que deseja remover:",
+    );
     const livro = await this.livroService.buscarPorId(id);
 
     if (!livro) {
-      console.log("\nLivro não encontrado.\n");
-      return;
+      throw new Error("Livro não encontrado");
     }
 
     this.livroView.mostrarLivros([livro], "Livro selecionado:");
 
-    const confirmar = await confirm({
-      message: `Deseja realmente remover o livro "${livro.titulo}"?`,
-      default: false,
-    });
-
+    const confirmar = await this.livroView.solicitaConfirmacao(
+      `Deseja realmente remover o livro "${livro.titulo}"?`,
+    );
     if (!confirmar) {
-      console.log("\nOperação cancelada.\n");
       return;
     }
-
     const removido = await this.livroService.excluir(id);
 
     if (!removido) {
-      console.log("\nLivro não encontrado.\n");
-      return;
+      throw new Error("Livro não encontrado.");
     }
 
-    console.log("\nLivro removido com sucesso!\n");
+    this.livroView.mensagemSucesso("Livro removido com sucesso!");
   }
 }
