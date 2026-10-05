@@ -1,6 +1,8 @@
 import Table from "cli-table3";
 import { Cliente } from "../models/Cliente";
-import { select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
+import { BaseView } from "./BaseView";
+import { CriarClienteDTO } from "../dtos/cliente/CriarClienteDTO";
 
 export enum OpcoesMenuCliente {
   buscar,
@@ -10,7 +12,15 @@ export enum OpcoesMenuCliente {
   sair,
 }
 
-export class ClienteView {
+export enum OpcaoBuscarClientePor {
+  todos,
+  id,
+  nome,
+  email,
+  sair,
+}
+
+export class ClienteView extends BaseView {
   async mostrarOpcoes(): Promise<OpcoesMenuCliente> {
     return await select({
       message: "Gerenciador de clientes:",
@@ -37,6 +47,86 @@ export class ClienteView {
         },
       ],
     });
+  }
+
+  async mostraOpcoesBuscarClientePor(): Promise<OpcaoBuscarClientePor> {
+    return await select({
+      message: "Buscar cliente por:",
+      choices: [
+        {
+          name: "Listar todos",
+          value: OpcaoBuscarClientePor.todos,
+        },
+        {
+          name: "ID",
+          value: OpcaoBuscarClientePor.id,
+        },
+        {
+          name: "Nome",
+          value: OpcaoBuscarClientePor.nome,
+        },
+        {
+          name: "E-mail",
+          value: OpcaoBuscarClientePor.email,
+        },
+        {
+          name: "Sair",
+          value: OpcaoBuscarClientePor.sair,
+        },
+      ],
+    });
+  }
+
+  async solicitaDadosCliente(): Promise<CriarClienteDTO> {
+    const nome = await input({
+      message: "Nome do cliente:",
+    });
+
+    const email = await input({
+      message: "E-mail:",
+    });
+
+    const telefone =
+      (
+        await input({
+          message: "Telefone (opcional):",
+        })
+      ).trim() || null;
+
+    const dadosCliente: CriarClienteDTO = {
+      nome: nome,
+      email: email,
+      telefone: telefone,
+    };
+    return dadosCliente;
+  }
+
+  async solicitaDadosAtualizarCliente(cliente: Cliente): Promise<Cliente> {
+    let clienteAtualizado: Cliente = {
+      id: cliente.id,
+      nome: "",
+      email: "",
+      telefone: null,
+    };
+    clienteAtualizado.nome = await input({
+      message: "Nome:",
+      default: cliente.nome,
+    });
+
+    clienteAtualizado.email = await input({
+      message: "E-mail:",
+      default: cliente.email,
+    });
+
+    clienteAtualizado.telefone =
+      (
+        await input({
+          message: "Telefone:",
+          default: cliente.telefone ?? "",
+        })
+      ).trim() || null;
+
+    return clienteAtualizado;
   }
 
   mostrarClientes(clientes: Cliente[], mensagem?: string): void {

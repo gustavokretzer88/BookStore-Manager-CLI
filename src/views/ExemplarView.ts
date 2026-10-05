@@ -1,6 +1,9 @@
 import Table from "cli-table3";
-import { confirm, input, select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { EstadoConservacao, Exemplar } from "../models/Exemplar";
+import { BaseView } from "./BaseView";
+import { Livro } from "../models/Livro";
+import { CriarExemplarDTO } from "../dtos/exemplar/CriarExemplarDTO";
 
 export enum OpcoesMenuExemplar {
   buscar,
@@ -20,7 +23,7 @@ export enum OpcoesBuscarExemplarPor {
   sair,
 }
 
-export class ExemplarView {
+export class ExemplarView extends BaseView {
   async mostrarOpcoes(): Promise<OpcoesMenuExemplar> {
     return await select({
       message: "Gerenciador de exemplares:",
@@ -137,5 +140,57 @@ export class ExemplarView {
       return estadoAtual;
     }
     throw new Error("Erro ao selecionar estado");
+  }
+
+  async selecionaLivro(livros: Livro[]): Promise<number> {
+    return await select({
+      message: "Selecione o livro:",
+      choices: livros.map((livro) => ({
+        name: `${livro.titulo} (ID: ${livro.id})`,
+        value: livro.id,
+      })),
+    });
+  }
+
+  async solicitaDadosExemplar(livros: Livro[]): Promise<CriarExemplarDTO> {
+    const codigo = await this.perguntar("Código do exemplar:");
+    const livroId = await this.selecionaLivro(livros);
+    const estado = await this.selecionarEstado();
+
+    const dadosExemplar: CriarExemplarDTO = {
+      codigo: codigo,
+      livro_id: livroId,
+      estado_conservacao: estado,
+    };
+    return dadosExemplar;
+  }
+
+  async solicitaDadosAtualizarExemplar(
+    exemplar: Exemplar,
+    livros: Livro[],
+  ): Promise<Exemplar> {
+    const codigo = await input({
+      message: "Código:",
+      default: exemplar.codigo,
+    });
+
+    const livroId = await select({
+      message: "Selecione o livro:",
+      choices: livros.map((livro) => ({
+        name: `${livro.titulo} (ID: ${livro.id})`,
+        value: livro.id,
+      })),
+      default: exemplar.livro_id,
+    });
+
+    const estado = await this.selecionarEstado(exemplar.estado_conservacao);
+
+    const exemplarAtualizado: Exemplar = {
+      id: exemplar.id,
+      codigo: codigo,
+      livro_id: livroId,
+      estado_conservacao: estado,
+    };
+    return exemplarAtualizado;
   }
 }

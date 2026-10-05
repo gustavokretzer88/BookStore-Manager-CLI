@@ -20,7 +20,6 @@ import { ExemplarController } from "./controllers/ExemplarController";
 import { ClienteController } from "./controllers/ClienteController";
 import { EmprestimoController } from "./controllers/EmprestimoController";
 import { RelatorioController } from "./controllers/RelatorioController";
-import { BaseView } from "./views/BaseView";
 
 async function main(): Promise<void> {
   // ========================================
@@ -95,9 +94,6 @@ async function main(): Promise<void> {
     emprestimoController,
     relatorioController,
   );
-
-  const view = new BaseView();
-  await view.perguntar("olá");
 
   await menu.executar();
 

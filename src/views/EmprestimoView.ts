@@ -5,6 +5,10 @@ import { formatData } from "../utils/FormatData";
 import { Emprestimo } from "../models/Emprestimo";
 import { Cliente } from "../models/Cliente";
 import { Exemplar } from "../models/Exemplar";
+import { BaseView } from "./BaseView";
+import { dataAtual } from "../utils/DataAtual";
+import { CadastrarEmprestimoDTO } from "../dtos/emprestimo/CadastrarEmprestimoDTO";
+import { DevolucaoEmprestimoDTO as DevolucaoEmprestimoDTO } from "../dtos/emprestimo/DevolucaoEmprestimoDTO";
 
 export enum OpcoesMenuEmprestimo {
   buscar,
@@ -23,7 +27,7 @@ export enum OpcoesBuscarEmprestimo {
   sair,
 }
 
-export class EmprestimoView {
+export class EmprestimoView extends BaseView {
   async mostrarOpcoes(): Promise<OpcoesMenuEmprestimo> {
     return await select({
       message: "Gerenciamento de empréstimos:",
@@ -138,6 +142,16 @@ export class EmprestimoView {
     });
   }
 
+  async selecionarEmprestimo(emprestimos: Emprestimo[]): Promise<number> {
+    return await select({
+      message: "Selecione o empréstimo:",
+      choices: emprestimos.map((emprestimo) => ({
+        name: this.descricaoEmprestimo(emprestimo),
+        value: emprestimo.id,
+      })),
+    });
+  }
+
   async lerId(message: string): Promise<number> {
     const resposta = await input({
       message,
@@ -148,7 +162,62 @@ export class EmprestimoView {
     if (!Number.isInteger(id) || id <= 0) {
       throw new Error("O ID deve ser um número inteiro maior que zero.");
     }
-
     return id;
+  }
+
+  async solicitaData(mensagem: string): Promise<string> {
+    return await input({
+      message: mensagem,
+      default: dataAtual(),
+    });
+  }
+
+  async solicitaDadosEmprestimo(
+    clientes: Cliente[],
+    exemplares: Exemplar[],
+  ): Promise<CadastrarEmprestimoDTO> {
+    const clienteId = await this.selecionarCliente(clientes);
+    const exemplarId = await this.selecionarExemplar(exemplares);
+    const dataEmprestimo = await this.solicitaData(
+      "Data do empréstimo (AAAA-MM-DD):",
+    );
+
+    const dadosEmprestimo: CadastrarEmprestimoDTO = {
+      exemplarId: exemplarId,
+      clienteId: clienteId,
+      dataEmprestimo: dataEmprestimo,
+    };
+    return dadosEmprestimo;
+  }
+
+  async solicitaDadosDevolucaoEmprestimo(
+    emprestimos: Emprestimo[],
+  ): Promise<DevolucaoEmprestimoDTO> {
+    const emprestimoId = await this.selecionarEmprestimo(emprestimos);
+    const dataDevolucao = await this.solicitaData(
+      "Data da devolução (AAAA-MM-DD):",
+    );
+    const confirmar = await this.solicitaConfirmacao(
+      `Confirmar devolução do empréstimo #${emprestimoId}?`,
+    );
+    if (!confirmar) throw new Error("Operação cancelada!");
+
+    const dadosDevolucao: DevolucaoEmprestimoDTO = {
+      emprestimo_id: emprestimoId,
+      dataDevolucao: dataDevolucao,
+    };
+    return dadosDevolucao;
+  }
+
+  descricaoEmprestimo(emprestimo: Emprestimo): string {
+    const status = emprestimo.data_devolucao ? "Devolvido" : "Ativo";
+
+    return (
+      `#${emprestimo.id} — ` +
+      `Exemplar ${emprestimo.exemplar_id} — ` +
+      `Cliente ${emprestimo.cliente_id} — ` +
+      `${formatData(emprestimo.data_emprestimo)} — ` +
+      status
+    );
   }
 }

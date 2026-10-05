@@ -1,10 +1,8 @@
 import { pool } from "../database/connection";
-import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
 import { EmprestimosPorLivroDTO } from "../dtos/relatorio/EmprestimosPorLivroDTO";
 import { LivrosPorAutorDTO } from "../dtos/relatorio/LivrosPorAutorDTO";
 import { LivroTituloAutorDTO } from "../dtos/relatorio/LivroTituloAutorDTO";
 import { Cliente } from "../models/Cliente";
-import { Livro } from "../models/Livro";
 
 export class RelatorioRepository {
   async NumeroDelivrosPorAutor(): Promise<LivrosPorAutorDTO[]> {

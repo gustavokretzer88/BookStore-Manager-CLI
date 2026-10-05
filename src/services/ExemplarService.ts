@@ -1,3 +1,4 @@
+import { CriarExemplarDTO } from "../dtos/exemplar/CriarExemplarDTO";
 import { Exemplar, EstadoConservacao } from "../models/Exemplar";
 import { ExemplarRepository } from "../repositories/ExemplarRepository";
 import { LivroRepository } from "../repositories/LivroRepository";
@@ -13,38 +14,25 @@ export class ExemplarService {
   }
 
   async buscarPorId(id: number): Promise<Exemplar | null> {
-    if (id <= 0) {
-      throw new Error("O ID do exemplar deve ser maior que zero.");
-    }
-
+    this.validarId(id);
     return this.exemplarRepository.buscarPorId(id);
   }
 
   async buscarPorCodigo(codigo: string): Promise<Exemplar | null> {
-    if (!codigo.trim()) {
-      throw new Error("O código do exemplar é obrigatório.");
-    }
-
-    return this.exemplarRepository.buscarPorCodigo(codigo.trim());
+    this.validarCodigo(codigo);
+    return this.exemplarRepository.buscarPorCodigo(codigo);
   }
 
   async buscarPorLivro(livroId: number): Promise<Exemplar[]> {
-    if (livroId <= 0) {
-      throw new Error("O ID do livro deve ser maior que zero.");
-    }
-
+    this.validarLivroId(livroId);
     const livro = await this.livroRepository.buscarPorId(livroId);
-
-    if (!livro) {
-      throw new Error(`Livro com ID ${livroId} não encontrado.`);
-    }
+    if (!livro) throw new Error(`Livro com ID ${livroId} não encontrado.`);
 
     return this.exemplarRepository.buscarPorLivro(livroId);
   }
 
   async buscarPorEstado(estado: EstadoConservacao): Promise<Exemplar[]> {
     this.validarEstado(estado);
-
     return this.exemplarRepository.buscarPorEstado(estado);
   }
 
@@ -52,95 +40,48 @@ export class ExemplarService {
     return this.exemplarRepository.buscarDisponiveis();
   }
 
-  async cadastrar(
-    codigo: string,
-    livroId: number,
-    estadoConservacao: EstadoConservacao,
-  ): Promise<Exemplar> {
-    if (!codigo.trim()) {
-      throw new Error("O código do exemplar é obrigatório.");
-    }
+  async cadastrar(dadosExemplar: CriarExemplarDTO): Promise<Exemplar> {
+    this.validarExemplar(dadosExemplar);
 
-    if (livroId <= 0) {
-      throw new Error("O ID do livro deve ser maior que zero.");
-    }
+    const livro = await this.livroRepository.buscarPorId(
+      dadosExemplar.livro_id,
+    );
+    if (!livro)
+      throw new Error(`Livro com ID ${dadosExemplar.livro_id} não encontrado.`);
 
-    this.validarEstado(estadoConservacao);
-
-    const livro = await this.livroRepository.buscarPorId(livroId);
-
-    if (!livro) {
-      throw new Error(`Livro com ID ${livroId} não encontrado.`);
-    }
-
-    const codigoNormalizado = codigo.trim();
-
-    const exemplarExistente =
-      await this.exemplarRepository.buscarPorCodigo(codigoNormalizado);
+    const exemplarExistente = await this.exemplarRepository.buscarPorCodigo(
+      dadosExemplar.codigo,
+    );
 
     if (exemplarExistente) {
       throw new Error(
-        `Já existe um exemplar cadastrado com o código ${codigoNormalizado}.`,
+        `Já existe um exemplar cadastrado com o código ${dadosExemplar.codigo}.`,
       );
     }
 
-    return this.exemplarRepository.criar(
-      codigoNormalizado,
-      livroId,
-      estadoConservacao,
-    );
+    return this.exemplarRepository.criar(dadosExemplar);
   }
 
-  async atualizar(
-    id: number,
-    codigo: string,
-    livroId: number,
-    estadoConservacao: EstadoConservacao,
-  ): Promise<Exemplar | null> {
-    if (id <= 0) {
-      throw new Error("O ID do exemplar deve ser maior que zero.");
-    }
+  async atualizar(exemplar: Exemplar): Promise<Exemplar | null> {
+    this.validarExemplar(exemplar);
+    const livro = await this.livroRepository.buscarPorId(exemplar.livro_id);
 
-    if (!codigo.trim()) {
-      throw new Error("O código do exemplar é obrigatório.");
-    }
-
-    if (livroId <= 0) {
-      throw new Error("O ID do livro deve ser maior que zero.");
-    }
-
-    this.validarEstado(estadoConservacao);
-
-    const livro = await this.livroRepository.buscarPorId(livroId);
-
-    if (!livro) {
-      throw new Error(`Livro com ID ${livroId} não encontrado.`);
-    }
-
-    const codigoNormalizado = codigo.trim();
+    if (!livro)
+      throw new Error(`Livro com ID ${exemplar.livro_id} não encontrado.`);
 
     const exemplarComMesmoCodigo =
-      await this.exemplarRepository.buscarPorCodigo(codigoNormalizado);
+      await this.exemplarRepository.buscarPorCodigo(exemplar.codigo);
 
-    if (exemplarComMesmoCodigo && exemplarComMesmoCodigo.id !== id) {
+    if (exemplarComMesmoCodigo && exemplarComMesmoCodigo.id !== exemplar.id)
       throw new Error(
-        `Já existe outro exemplar cadastrado com o código ${codigoNormalizado}.`,
+        `Já existe outro exemplar cadastrado com o código ${exemplar.codigo}.`,
       );
-    }
 
-    return this.exemplarRepository.atualizar(
-      id,
-      codigoNormalizado,
-      livroId,
-      estadoConservacao,
-    );
+    return this.exemplarRepository.atualizar(exemplar);
   }
 
   async excluir(id: number): Promise<boolean> {
-    if (id <= 0) {
-      throw new Error("O ID do exemplar deve ser maior que zero.");
-    }
-
+    this.validarId(id);
     return this.exemplarRepository.excluir(id);
   }
 
@@ -155,5 +96,26 @@ export class ExemplarService {
     if (!estadosValidos.includes(estado)) {
       throw new Error(`Estado de conservação inválido: ${estado}.`);
     }
+  }
+
+  private validarId(id: number) {
+    if (id <= 0) throw new Error("O ID do exemplar deve ser maior que zero.");
+  }
+
+  private validarLivroId(id: number) {
+    if (id <= 0) throw new Error("O ID do livro deve ser maior que zero.");
+  }
+  private validarCodigo(codigo: string) {
+    codigo = codigo.trim();
+    if (!codigo) {
+      throw new Error("O código do exemplar é obrigatório.");
+    }
+  }
+
+  private validarExemplar(exemplar: CriarExemplarDTO | Exemplar) {
+    if ("id" in exemplar) this.validarId(exemplar.id);
+    this.validarLivroId(exemplar.livro_id);
+    this.validarEstado(exemplar.estado_conservacao);
+    this.validarCodigo(exemplar.codigo);
   }
 }

@@ -1,6 +1,6 @@
 import { Autor } from "../models/Autor";
 import Table from "cli-table3";
-import { confirm, input, select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { Livro } from "../models/Livro";
 import { LivroComAutorDTO } from "../dtos/livro/LivroComAutorDTO";
 import { BaseView } from "./BaseView";

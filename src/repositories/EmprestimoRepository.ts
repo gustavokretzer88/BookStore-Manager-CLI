@@ -1,4 +1,6 @@
 import { pool } from "../database/connection";
+import { CadastrarEmprestimoDTO } from "../dtos/emprestimo/CadastrarEmprestimoDTO";
+import { DevolucaoEmprestimoDTO } from "../dtos/emprestimo/DevolucaoEmprestimoDTO";
 import { Emprestimo } from "../models/Emprestimo";
 
 export class EmprestimoRepository {
@@ -128,11 +130,7 @@ export class EmprestimoRepository {
     return result.rows;
   }
 
-  async criar(
-    exemplarId: number,
-    clienteId: number,
-    dataEmprestimo: string,
-  ): Promise<Emprestimo> {
+  async criar(dadosEmprestimo: CadastrarEmprestimoDTO): Promise<Emprestimo> {
     const result = await pool.query<Emprestimo>(
       `
             INSERT INTO emprestimos (
@@ -148,7 +146,11 @@ export class EmprestimoRepository {
                 data_emprestimo,
                 data_devolucao
             `,
-      [exemplarId, clienteId, dataEmprestimo],
+      [
+        dadosEmprestimo.exemplarId,
+        dadosEmprestimo.clienteId,
+        dadosEmprestimo.dataEmprestimo,
+      ],
     );
 
     const emprestimo = result.rows[0];
@@ -161,8 +163,7 @@ export class EmprestimoRepository {
   }
 
   async devolver(
-    id: number,
-    dataDevolucao: string,
+    devolucao: DevolucaoEmprestimoDTO,
   ): Promise<Emprestimo | null> {
     const result = await pool.query<Emprestimo>(
       `
@@ -178,7 +179,7 @@ export class EmprestimoRepository {
                 data_emprestimo,
                 data_devolucao
             `,
-      [dataDevolucao, id],
+      [devolucao.dataDevolucao, devolucao.emprestimo_id],
     );
 
     return result.rows[0] ?? null;

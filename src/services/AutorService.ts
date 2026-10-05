@@ -25,25 +25,19 @@ export class AutorService {
   }
 
   async buscarPorId(id: number): Promise<Autor | null> {
-    if (id <= 0) {
-      throw new Error("O ID do autor deve ser maior que zero.");
-    }
+    this.validarId(id);
 
     return this.autorRepository.buscarPorId(id);
   }
 
   async buscarPorNome(nome: string): Promise<Autor[]> {
-    if (!nome.trim()) {
-      throw new Error("O nome do autor é obrigatório.");
-    }
+    this.validarNome(nome);
 
     return this.autorRepository.buscarPorNome(nome.trim());
   }
 
   async cadastrar(dadosCriarAutor: CriarAutorDTO): Promise<Autor> {
-    if (!dadosCriarAutor.nome.trim()) {
-      throw new Error("O nome do autor é obrigatório.");
-    }
+    this.validarNome(dadosCriarAutor.nome);
 
     this.coerenciaAnoNascimementoFalecimento(
       dadosCriarAutor.ano_nascimento,
@@ -54,13 +48,8 @@ export class AutorService {
   }
 
   async atualizar(autor: Autor): Promise<Autor | null> {
-    if (autor.id <= 0) {
-      throw new Error("O ID do autor deve ser maior que zero.");
-    }
-
-    if (!autor.nome.trim()) {
-      throw new Error("O nome do autor é obrigatório.");
-    }
+    this.validarId(autor.id);
+    this.validarNome(autor.nome);
 
     this.coerenciaAnoNascimementoFalecimento(
       autor.ano_nascimento,
@@ -71,10 +60,19 @@ export class AutorService {
   }
 
   async excluir(id: number): Promise<boolean> {
+    this.validarId(id);
+    return this.autorRepository.excluir(id);
+  }
+
+  private validarId(id: number) {
     if (id <= 0) {
       throw new Error("O ID do autor deve ser maior que zero.");
     }
+  }
 
-    return this.autorRepository.excluir(id);
+  private validarNome(nome: string) {
+    if (!nome.trim()) {
+      throw new Error("O nome do autor é obrigatório.");
+    }
   }
 }

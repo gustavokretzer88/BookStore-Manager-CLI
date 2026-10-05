@@ -1,4 +1,5 @@
 import { pool } from "../database/connection";
+import { CriarExemplarDTO } from "../dtos/exemplar/CriarExemplarDTO";
 import { Exemplar } from "../models/Exemplar";
 
 export class ExemplarRepository {
@@ -108,11 +109,7 @@ export class ExemplarRepository {
     return result.rows;
   }
 
-  async criar(
-    codigo: string,
-    livroId: number,
-    estadoConservacao: Exemplar["estado_conservacao"],
-  ): Promise<Exemplar> {
+  async criar(dadosExemplo: CriarExemplarDTO): Promise<Exemplar> {
     const result = await pool.query<Exemplar>(
       `
             INSERT INTO exemplares (
@@ -127,7 +124,11 @@ export class ExemplarRepository {
                 livro_id,
                 estado_conservacao
             `,
-      [codigo, livroId, estadoConservacao],
+      [
+        dadosExemplo.codigo,
+        dadosExemplo.livro_id,
+        dadosExemplo.estado_conservacao,
+      ],
     );
 
     const exemplar = result.rows[0];
@@ -139,12 +140,7 @@ export class ExemplarRepository {
     return exemplar;
   }
 
-  async atualizar(
-    id: number,
-    codigo: string,
-    livroId: number,
-    estadoConservacao: Exemplar["estado_conservacao"],
-  ): Promise<Exemplar | null> {
+  async atualizar(exemplar: Exemplar): Promise<Exemplar | null> {
     const result = await pool.query<Exemplar>(
       `
             UPDATE exemplares
@@ -159,7 +155,12 @@ export class ExemplarRepository {
                 livro_id,
                 estado_conservacao
             `,
-      [codigo, livroId, estadoConservacao, id],
+      [
+        exemplar.codigo,
+        exemplar.livro_id,
+        exemplar.estado_conservacao,
+        exemplar.id,
+      ],
     );
 
     return result.rows[0] ?? null;

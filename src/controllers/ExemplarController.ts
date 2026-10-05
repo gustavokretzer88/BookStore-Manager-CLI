@@ -1,7 +1,3 @@
-import { confirm, input, select } from "@inquirer/prompts";
-import Table from "cli-table3";
-
-import { Exemplar, EstadoConservacao } from "../models/Exemplar";
 import { ExemplarService } from "../services/ExemplarService";
 import { LivroService } from "../services/LivroService";
 import {
@@ -25,19 +21,15 @@ export class ExemplarController {
         case OpcoesMenuExemplar.buscar:
           await this.buscar();
           break;
-
         case OpcoesMenuExemplar.adicionar:
           await this.adicionar();
           break;
-
         case OpcoesMenuExemplar.atualizar:
           await this.atualizar();
           break;
-
         case OpcoesMenuExemplar.remover:
           await this.remover();
           break;
-
         case OpcoesMenuExemplar.sair:
           continuar = false;
           break;
@@ -49,182 +41,94 @@ export class ExemplarController {
     const selecao = await this.exemplarView.mostrarOpcoesBusca();
 
     switch (selecao) {
-      case OpcoesBuscarExemplarPor.todos: {
-        const exemplares = await this.exemplarService.buscarTodos();
-
-        this.exemplarView.mostrarExemplares(exemplares);
+      case OpcoesBuscarExemplarPor.todos:
+        await this.buscarExemplarPorTodos();
         break;
-      }
-
-      case OpcoesBuscarExemplarPor.id: {
-        const resposta = await input({
-          message: "ID do exemplar:",
-        });
-
-        const id = Number(resposta);
-
-        if (!Number.isInteger(id) || id <= 0) {
-          throw new Error("O ID deve ser um número inteiro maior que zero.");
-        }
-
-        const exemplar = await this.exemplarService.buscarPorId(id);
-
-        this.exemplarView.mostrarExemplares(exemplar ? [exemplar] : []);
-
+      case OpcoesBuscarExemplarPor.id:
+        await this.buscarExemplarPorId();
         break;
-      }
-
-      case OpcoesBuscarExemplarPor.codigo: {
-        const codigo = await input({
-          message: "Código do exemplar:",
-        });
-
-        const exemplar = await this.exemplarService.buscarPorCodigo(codigo);
-
-        this.exemplarView.mostrarExemplares(exemplar ? [exemplar] : []);
-
+      case OpcoesBuscarExemplarPor.codigo:
+        await this.buscarExemplarPorCodigo();
         break;
-      }
-
-      case OpcoesBuscarExemplarPor.livro: {
-        const livros = await this.livroService.buscarTodos();
-
-        if (livros.length === 0) {
-          console.log("\nNão existem livros cadastrados.\n");
-          break;
-        }
-
-        const livroId = await select({
-          message: "Selecione o livro:",
-          choices: livros.map((livro) => ({
-            name: `${livro.titulo} (ID: ${livro.id})`,
-            value: livro.id,
-          })),
-        });
-
-        const exemplares = await this.exemplarService.buscarPorLivro(livroId);
-
-        this.exemplarView.mostrarExemplares(exemplares);
-
+      case OpcoesBuscarExemplarPor.livro:
+        await this.buscarExemplarPorLivro();
         break;
-      }
-
-      case OpcoesBuscarExemplarPor.estado: {
-        const estado = await this.exemplarView.selecionarEstado();
-
-        const exemplares = await this.exemplarService.buscarPorEstado(estado);
-
-        this.exemplarView.mostrarExemplares(exemplares);
-
+      case OpcoesBuscarExemplarPor.estado:
+        await this.buscarExemplarPorEstado();
         break;
-      }
-
-      case OpcoesBuscarExemplarPor.disponiveis: {
-        const exemplares = await this.exemplarService.buscarDisponiveis();
-
-        this.exemplarView.mostrarExemplares(exemplares);
-
+      case OpcoesBuscarExemplarPor.disponiveis:
+        await this.buscarExemplarPorDisponiveis();
         break;
-      }
-
       case OpcoesBuscarExemplarPor.sair:
         break;
     }
   }
 
-  private async adicionar(): Promise<void> {
-    console.log("\n=== Adicionar exemplar ===\n");
+  private async buscarExemplarPorTodos() {
+    const exemplares = await this.exemplarService.buscarTodos();
+    this.exemplarView.mostrarExemplares(exemplares);
+  }
 
-    const codigo = await input({
-      message: "Código do exemplar:",
-    });
+  private async buscarExemplarPorId() {
+    const id = await this.exemplarView.perguntarNumero("ID do exemplar:");
+    const exemplar = await this.exemplarService.buscarPorId(id);
+    this.exemplarView.mostrarExemplares(exemplar ? [exemplar] : []);
+  }
 
+  private async buscarExemplarPorCodigo() {
+    const codigo = await this.exemplarView.perguntar("Código do exemplar:");
+    const exemplar = await this.exemplarService.buscarPorCodigo(codigo);
+    this.exemplarView.mostrarExemplares(exemplar ? [exemplar] : []);
+  }
+
+  private async buscarExemplarPorLivro() {
     const livros = await this.livroService.buscarTodos();
+    const livroId = await this.exemplarView.selecionaLivro(livros);
+    const exemplares = await this.exemplarService.buscarPorLivro(livroId);
+    this.exemplarView.mostrarExemplares(exemplares);
+  }
 
-    if (livros.length === 0) {
+  private async buscarExemplarPorEstado() {
+    const estado = await this.exemplarView.selecionarEstado();
+    const exemplares = await this.exemplarService.buscarPorEstado(estado);
+    this.exemplarView.mostrarExemplares(exemplares);
+  }
+  private async buscarExemplarPorDisponiveis() {
+    const exemplares = await this.exemplarService.buscarDisponiveis();
+    this.exemplarView.mostrarExemplares(exemplares);
+  }
+
+  private async adicionar(): Promise<void> {
+    const livros = await this.livroService.buscarTodos();
+    if (livros.length === 0)
       throw new Error(
         "Não é possível cadastrar um exemplar porque não existem livros cadastrados.",
       );
-    }
 
-    const livroId = await select({
-      message: "Selecione o livro:",
-      choices: livros.map((livro) => ({
-        name: `${livro.titulo} (ID: ${livro.id})`,
-        value: livro.id,
-      })),
-    });
-
-    const estado = await this.exemplarView.selecionarEstado();
-
-    const exemplar = await this.exemplarService.cadastrar(
-      codigo,
-      livroId,
-      estado,
-    );
-
-    console.log("\nExemplar cadastrado com sucesso!\n");
-
+    const dadosExemplar = await this.exemplarView.solicitaDadosExemplar(livros);
+    const exemplar = await this.exemplarService.cadastrar(dadosExemplar);
     this.exemplarView.mostrarExemplares([exemplar]);
   }
 
   private async atualizar(): Promise<void> {
-    console.log("\n=== Atualizar exemplar ===\n");
+    const livros = await this.livroService.buscarTodos();
+    if (livros.length === 0) throw new Error("Não existem livros cadastrados.");
 
-    const respostaId = await input({
-      message: "ID do exemplar que deseja atualizar:",
-    });
-
-    const id = Number(respostaId);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("O ID deve ser um número inteiro maior que zero.");
-    }
-
+    const id = await this.exemplarView.perguntarNumero(
+      "ID do exemplar que deseja atualizar:",
+    );
     const exemplar = await this.exemplarService.buscarPorId(id);
-
-    if (!exemplar) {
-      console.log("\nExemplar não encontrado.\n");
-      return;
-    }
+    if (!exemplar) throw new Error("Exemplar não encontrado.");
 
     this.exemplarView.mostrarExemplares([exemplar], "Exemplar selecionado:");
 
-    const codigo = await input({
-      message: "Código:",
-      default: exemplar.codigo,
-    });
+    const dadosExemplar =
+      await this.exemplarView.solicitaDadosAtualizarExemplar(exemplar, livros);
 
-    const livros = await this.livroService.buscarTodos();
+    const exemplarAtualizado =
+      await this.exemplarService.atualizar(dadosExemplar);
 
-    if (livros.length === 0) {
-      throw new Error("Não existem livros cadastrados.");
-    }
-
-    const livroId = await select({
-      message: "Selecione o livro:",
-      choices: livros.map((livro) => ({
-        name: `${livro.titulo} (ID: ${livro.id})`,
-        value: livro.id,
-      })),
-      default: exemplar.livro_id,
-    });
-
-    const estado = await this.exemplarView.selecionarEstado(
-      exemplar.estado_conservacao,
-    );
-
-    const exemplarAtualizado = await this.exemplarService.atualizar(
-      id,
-      codigo,
-      livroId,
-      estado,
-    );
-
-    if (!exemplarAtualizado) {
-      console.log("\nExemplar não encontrado.\n");
-      return;
-    }
+    if (!exemplarAtualizado) throw new Error("Exemplar não encontrado.");
 
     this.exemplarView.mostrarExemplares(
       [exemplarAtualizado],
@@ -233,44 +137,22 @@ export class ExemplarController {
   }
 
   private async remover(): Promise<void> {
-    console.log("\n=== Remover exemplar ===\n");
-
-    const respostaId = await input({
-      message: "ID do exemplar que deseja remover:",
-    });
-
-    const id = Number(respostaId);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("O ID deve ser um número inteiro maior que zero.");
-    }
-
+    const id = await this.exemplarView.perguntarNumero(
+      "ID do exemplar que deseja remover:",
+    );
     const exemplar = await this.exemplarService.buscarPorId(id);
-
-    if (!exemplar) {
-      console.log("\nExemplar não encontrado.\n");
-      return;
-    }
+    if (!exemplar) throw new Error("Exemplar não encontrado.");
 
     this.exemplarView.mostrarExemplares([exemplar], "Exemplar selecionado:");
-
-    const confirmar = await confirm({
-      message: `Deseja realmente remover o exemplar "${exemplar.codigo}"?`,
-      default: false,
-    });
-
-    if (!confirmar) {
-      console.log("\nOperação cancelada.\n");
-      return;
-    }
+    const confirmar = await this.exemplarView.solicitaConfirmacao(
+      `Deseja realmente remover o exemplar "${exemplar.codigo}"?`,
+    );
+    if (!confirmar) return;
 
     const removido = await this.exemplarService.excluir(id);
 
-    if (!removido) {
-      console.log("\nExemplar não encontrado.\n");
-      return;
-    }
+    if (!removido) throw new Error("Exemplar não encontrado.");
 
-    console.log("\nExemplar removido com sucesso!\n");
+    this.exemplarView.mensagemSucesso("Exemplar removido!");
   }
 }

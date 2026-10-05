@@ -1,4 +1,3 @@
-import { select } from "@inquirer/prompts";
 import { LivroController } from "./LivroController";
 import { AutorController } from "./AutorController";
 import { ClienteController } from "./ClienteController";
@@ -46,6 +45,7 @@ export class MenuPrincipal {
             break;
           case OpcoesMenuPrincipal.relatorios:
             await this.relatoriosController.executar();
+            break;
           case OpcoesMenuPrincipal.sair:
             continuar = false;
             break;

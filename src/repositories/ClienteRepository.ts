@@ -1,4 +1,5 @@
 import { pool } from "../database/connection";
+import { CriarClienteDTO } from "../dtos/cliente/CriarClienteDTO";
 import { Cliente } from "../models/Cliente";
 
 export class ClienteRepository {
@@ -68,11 +69,7 @@ export class ClienteRepository {
     return result.rows[0] ?? null;
   }
 
-  async criar(
-    nome: string,
-    email: string,
-    telefone: string | null,
-  ): Promise<Cliente> {
+  async criar(dadosCliente: CriarClienteDTO): Promise<Cliente> {
     const result = await pool.query<Cliente>(
       `
             INSERT INTO clientes (
@@ -87,7 +84,7 @@ export class ClienteRepository {
                 email,
                 telefone
             `,
-      [nome, email, telefone],
+      [dadosCliente.nome, dadosCliente.email, dadosCliente.telefone],
     );
 
     const cliente = result.rows[0];
@@ -99,12 +96,7 @@ export class ClienteRepository {
     return cliente;
   }
 
-  async atualizar(
-    id: number,
-    nome: string,
-    email: string,
-    telefone: string | null,
-  ): Promise<Cliente | null> {
+  async atualizar(cliente: Cliente): Promise<Cliente | null> {
     const result = await pool.query<Cliente>(
       `
             UPDATE clientes
@@ -119,7 +111,7 @@ export class ClienteRepository {
                 email,
                 telefone
             `,
-      [nome, email, telefone, id],
+      [cliente.nome, cliente.email, cliente.telefone, cliente.id],
     );
 
     return result.rows[0] ?? null;

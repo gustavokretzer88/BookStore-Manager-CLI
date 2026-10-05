@@ -1,7 +1,9 @@
-import { confirm, input, select } from "@inquirer/prompts";
-
 import { ClienteService } from "../services/ClienteService";
-import { ClienteView, OpcoesMenuCliente } from "../views/ClienteView";
+import {
+  ClienteView,
+  OpcaoBuscarClientePor,
+  OpcoesMenuCliente,
+} from "../views/ClienteView";
 
 export class ClienteController {
   private readonly clienteView: ClienteView = new ClienteView();
@@ -16,19 +18,15 @@ export class ClienteController {
         case OpcoesMenuCliente.buscar:
           await this.buscar();
           break;
-
         case OpcoesMenuCliente.adicionar:
           await this.adicionar();
           break;
-
         case OpcoesMenuCliente.atualizar:
           await this.atualizar();
           break;
-
         case OpcoesMenuCliente.remover:
           await this.remover();
           break;
-
         case OpcoesMenuCliente.sair:
           continuar = false;
           break;
@@ -37,114 +35,50 @@ export class ClienteController {
   }
 
   private async buscar(): Promise<void> {
-    enum ModoBusca {
-      listar,
-      id,
-      nome,
-      email,
-      sair,
-    }
-
-    const selecao = await select({
-      message: "Buscar cliente por:",
-      choices: [
-        {
-          name: "Listar todos",
-          value: ModoBusca.listar,
-        },
-        {
-          name: "ID",
-          value: ModoBusca.id,
-        },
-        {
-          name: "Nome",
-          value: ModoBusca.nome,
-        },
-        {
-          name: "E-mail",
-          value: ModoBusca.email,
-        },
-        {
-          name: "Sair",
-          value: ModoBusca.sair,
-        },
-      ],
-    });
-
-    switch (selecao) {
-      case ModoBusca.listar: {
-        const clientes = await this.clienteService.buscarTodos();
-
-        this.clienteView.mostrarClientes(clientes);
+    switch (await this.clienteView.mostraOpcoesBuscarClientePor()) {
+      case OpcaoBuscarClientePor.todos:
+        await this.buscarClienteTodos();
         break;
-      }
-
-      case ModoBusca.id: {
-        const resposta = await input({
-          message: "ID do cliente:",
-        });
-
-        const id = Number(resposta);
-
-        if (!Number.isInteger(id) || id <= 0) {
-          throw new Error("O ID deve ser um número inteiro maior que zero.");
-        }
-
-        const cliente = await this.clienteService.buscarPorId(id);
-
-        this.clienteView.mostrarClientes(cliente ? [cliente] : []);
-
+      case OpcaoBuscarClientePor.id:
+        await this.buscarClientePorId();
         break;
-      }
-
-      case ModoBusca.nome: {
-        const nome = await input({
-          message: "Nome do cliente:",
-        });
-
-        const clientes = await this.clienteService.buscarPorNome(nome);
-
-        this.clienteView.mostrarClientes(clientes);
+      case OpcaoBuscarClientePor.nome:
+        await this.buscarClientePorNome();
         break;
-      }
-
-      case ModoBusca.email: {
-        const email = await input({
-          message: "E-mail do cliente:",
-        });
-
-        const cliente = await this.clienteService.buscarPorEmail(email);
-
-        this.clienteView.mostrarClientes(cliente ? [cliente] : []);
-
+      case OpcaoBuscarClientePor.email:
+        await this.buscarClientePorEmail();
         break;
-      }
-
-      case ModoBusca.sair:
+      case OpcaoBuscarClientePor.sair:
         break;
     }
   }
 
+  private async buscarClienteTodos() {
+    const clientes = await this.clienteService.buscarTodos();
+    this.clienteView.mostrarClientes(clientes);
+  }
+
+  private async buscarClientePorId() {
+    const id = await this.clienteView.perguntarNumero("ID do cliente:");
+    const cliente = await this.clienteService.buscarPorId(id);
+    this.clienteView.mostrarClientes(cliente ? [cliente] : []);
+  }
+
+  private async buscarClientePorNome() {
+    const nome = await this.clienteView.perguntar("Nome do cliente:");
+    const clientes = await this.clienteService.buscarPorNome(nome);
+    this.clienteView.mostrarClientes(clientes);
+  }
+
+  private async buscarClientePorEmail() {
+    const email = await this.clienteView.perguntar("E-mail do cliente:");
+    const cliente = await this.clienteService.buscarPorEmail(email);
+    this.clienteView.mostrarClientes(cliente ? [cliente] : []);
+  }
+
   private async adicionar(): Promise<void> {
-    console.log("\n=== Adicionar cliente ===\n");
-
-    const nome = await input({
-      message: "Nome do cliente:",
-    });
-
-    const email = await input({
-      message: "E-mail:",
-    });
-
-    const telefone = await input({
-      message: "Telefone (opcional):",
-    });
-
-    const cliente = await this.clienteService.cadastrar(
-      nome,
-      email,
-      telefone.trim() === "" ? null : telefone,
-    );
+    const dadosCliente = await this.clienteView.solicitaDadosCliente();
+    const cliente = await this.clienteService.cadastrar(dadosCliente);
 
     this.clienteView.mostrarClientes(
       [cliente],
@@ -153,53 +87,22 @@ export class ClienteController {
   }
 
   private async atualizar(): Promise<void> {
-    console.log("\n=== Atualizar cliente ===\n");
-
-    const respostaId = await input({
-      message: "ID do cliente que deseja atualizar:",
-    });
-
-    const id = Number(respostaId);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("O ID deve ser um número inteiro maior que zero.");
-    }
-
+    const id = await this.clienteView.perguntarNumero(
+      "ID do cliente que deseja atualizar:",
+    );
     const cliente = await this.clienteService.buscarPorId(id);
 
-    if (!cliente) {
-      console.log("\nCliente não encontrado.\n");
-      return;
-    }
+    if (!cliente) throw new Error("Cliente não encontrado.");
 
     this.clienteView.mostrarClientes([cliente], "Cliente selecionado:");
 
-    const nome = await input({
-      message: "Nome:",
-      default: cliente.nome,
-    });
+    const dadosLivroAtualizado =
+      await this.clienteView.solicitaDadosAtualizarCliente(cliente);
 
-    const email = await input({
-      message: "E-mail:",
-      default: cliente.email,
-    });
+    const clienteAtualizado =
+      await this.clienteService.atualizar(dadosLivroAtualizado);
 
-    const telefone = await input({
-      message: "Telefone:",
-      default: cliente.telefone ?? "",
-    });
-
-    const clienteAtualizado = await this.clienteService.atualizar(
-      id,
-      nome,
-      email,
-      telefone.trim() === "" ? null : telefone,
-    );
-
-    if (!clienteAtualizado) {
-      console.log("\nCliente não encontrado.\n");
-      return;
-    }
+    if (!clienteAtualizado) throw Error("Erro ao atualizar cliente.");
 
     this.clienteView.mostrarClientes(
       [clienteAtualizado],
@@ -208,44 +111,25 @@ export class ClienteController {
   }
 
   private async remover(): Promise<void> {
-    console.log("\n=== Remover cliente ===\n");
-
-    const respostaId = await input({
-      message: "ID do cliente que deseja remover:",
-    });
-
-    const id = Number(respostaId);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      throw new Error("O ID deve ser um número inteiro maior que zero.");
-    }
+    const id = await this.clienteView.perguntarNumero(
+      "ID do cliente que deseja remover:",
+    );
 
     const cliente = await this.clienteService.buscarPorId(id);
 
-    if (!cliente) {
-      console.log("\nCliente não encontrado.\n");
-      return;
-    }
+    if (!cliente) throw new Error("Cliente não encontrado.");
 
     this.clienteView.mostrarClientes([cliente], "Cliente selecionado:");
 
-    const confirmar = await confirm({
-      message: `Deseja realmente remover o cliente "${cliente.nome}"?`,
-      default: false,
-    });
-
-    if (!confirmar) {
-      console.log("\nOperação cancelada.\n");
-      return;
-    }
+    const confirmar = await this.clienteView.solicitaConfirmacao(
+      `Deseja realmente remover o cliente "${cliente.nome}"?`,
+    );
+    if (!confirmar) return;
 
     const removido = await this.clienteService.excluir(id);
 
-    if (!removido) {
-      console.log("\nCliente não encontrado.\n");
-      return;
-    }
+    if (!removido) throw new Error("Cliente não encontrado.");
 
-    console.log("\nCliente removido com sucesso!\n");
+    this.clienteView.mensagemSucesso("Cliente removido!");
   }
 }

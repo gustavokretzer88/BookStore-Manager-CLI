@@ -1,6 +1,6 @@
 import { Autor } from "../models/Autor";
 import Table from "cli-table3";
-import { confirm, input, select } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import { CriarAutorDTO } from "../dtos/autor/CriarAutorDTO";
 import { BaseView } from "./BaseView";
 
@@ -121,7 +121,7 @@ export class AutorView extends BaseView {
       message: "Ano de falecimento (opcional):",
     });
 
-    const anoFalecimento = this.verificaEntradaAno(anoNascimentoResposta);
+    const anoFalecimento = this.verificaEntradaAno(anoFalecimentoResposta);
 
     const dados: CriarAutorDTO = {
       nome: nome,
@@ -155,7 +155,7 @@ export class AutorView extends BaseView {
       default: autor.ano_falecimento?.toString() ?? "",
     });
 
-    const anoFalecimento = this.verificaEntradaAno(anoNascimentoResposta);
+    const anoFalecimento = this.verificaEntradaAno(anoFalecimentoResposta);
 
     const dados: Autor = {
       id: autor.id,

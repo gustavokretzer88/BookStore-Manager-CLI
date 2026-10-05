@@ -1,5 +1,3 @@
-import { confirm, input, select } from "@inquirer/prompts";
-
 import { LivroService } from "../services/LivroService";
 import { AutorService } from "../services/AutorService";
 import {
@@ -18,27 +16,20 @@ export class LivroController {
 
   async executar(): Promise<void> {
     let continuar = true;
-
     while (continuar) {
-      const opcao = await this.livroView.mostrarOpcoes();
-
-      switch (opcao) {
+      switch (await this.livroView.mostrarOpcoes()) {
         case OpcoesMenuLivros.buscar:
           await this.buscar();
           break;
-
         case OpcoesMenuLivros.adicionar:
           await this.adicionar();
           break;
-
         case OpcoesMenuLivros.atualizar:
           await this.atualizar();
           break;
-
         case OpcoesMenuLivros.remover:
           await this.remover();
           break;
-
         case OpcoesMenuLivros.sair:
           continuar = false;
           break;
@@ -47,9 +38,7 @@ export class LivroController {
   }
 
   private async buscar(): Promise<void> {
-    const selecao = await this.livroView.mostrarOpcoesBuscarPor();
-
-    switch (selecao) {
+    switch (await this.livroView.mostrarOpcoesBuscarPor()) {
       case OpcoesBuscarPor.todos:
         await this.buscarPorTodos();
         break;
@@ -114,33 +103,29 @@ export class LivroController {
 
   private async adicionar(): Promise<void> {
     const autores = await this.autorService.buscarTodos();
-    if (autores.length === 0) {
+    if (autores.length === 0)
       throw new Error(
         "Não é possível cadastrar o livro porque não existem autores cadastrados.",
       );
-    }
+
     const dadosLivro = await this.livroView.solicitaDadosCriarLivro(autores);
-
     const livro = await this.livroService.cadastrar(dadosLivro);
-
     this.livroView.mostrarLivros([livro], "Livro cadastrado com sucesso!");
   }
 
   private async atualizar(): Promise<void> {
     const autores = await this.autorService.buscarTodos();
-    if (autores.length === 0) {
+    if (autores.length === 0)
       throw new Error(
         "Não é possível atualizar o livro porque não existem autores cadastrados.",
       );
-    }
+
     const id = await this.livroView.perguntarNumero(
       "ID do livro que deseja atualizar:",
     );
     const livro = await this.livroService.buscarPorId(id);
 
-    if (!livro) {
-      throw new Error("Livro não encontrado.");
-    }
+    if (!livro) throw new Error("Livro não encontrado.");
 
     this.livroView.mensagemSucesso(`Livro selecionado: ${livro.titulo}`);
 
@@ -151,9 +136,7 @@ export class LivroController {
       dadosLivrosAtualizado,
     );
 
-    if (!livroAtualizado) {
-      throw new Error("Erro ao atualizar livro.");
-    }
+    if (!livroAtualizado) throw new Error("Erro ao atualizar livro.");
 
     this.livroView.mostrarLivros(
       [livroAtualizado],
@@ -167,23 +150,18 @@ export class LivroController {
     );
     const livro = await this.livroService.buscarPorId(id);
 
-    if (!livro) {
-      throw new Error("Livro não encontrado");
-    }
+    if (!livro) throw new Error("Livro não encontrado");
 
     this.livroView.mostrarLivros([livro], "Livro selecionado:");
 
     const confirmar = await this.livroView.solicitaConfirmacao(
       `Deseja realmente remover o livro "${livro.titulo}"?`,
     );
-    if (!confirmar) {
-      return;
-    }
+    if (!confirmar) return;
+
     const removido = await this.livroService.excluir(id);
 
-    if (!removido) {
-      throw new Error("Livro não encontrado.");
-    }
+    if (!removido) throw new Error("Livro não encontrado.");
 
     this.livroView.mensagemSucesso("Livro removido com sucesso!");
   }

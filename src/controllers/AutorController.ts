@@ -78,10 +78,7 @@ export class AutorController {
     const id = await this.autorView.solicitaIdAutor();
     const autor = await this.autorService.buscarPorId(id);
 
-    if (!autor) {
-      throw new Error("Autor não encontrado.");
-      return;
-    }
+    if (!autor) throw new Error("Autor não encontrado.");
 
     this.autorView.mostrarAutores([autor], "Autor selecionado:");
 
@@ -98,10 +95,7 @@ export class AutorController {
     const autorAtualizado =
       await this.autorService.atualizar(dadosAutorAtualizado);
 
-    if (!autorAtualizado) {
-      console.log("\nAutor não encontrado.\n");
-      return;
-    }
+    if (!autorAtualizado) throw new Error("Autor não encontrado.");
 
     this.autorView.mostrarAutores(
       [autorAtualizado],
@@ -113,22 +107,18 @@ export class AutorController {
     const id = await this.autorView.solicitaIdAutor();
     const autor = await this.autorService.buscarPorId(id);
 
-    if (!autor) {
-      throw new Error("Autor não encontrado.");
-    }
+    if (!autor) throw new Error("Autor não encontrado.");
 
     this.autorView.mostrarAutores([autor], "Autor selecionado:");
     if (
       !(await this.autorView.solicitaConfirmacao(
         `Deseja realmente remover o autor "${autor.nome}"?`,
       ))
-    ) {
+    )
       return;
-    }
     const removido = await this.autorService.excluir(id);
-    if (!removido) {
-      throw new Error("Autor não encontrado.");
-    }
+    if (!removido) throw new Error("Autor não encontrado.");
+
     this.autorView.mensagemSucesso("Autor excluido com sucesso!");
   }
 }
